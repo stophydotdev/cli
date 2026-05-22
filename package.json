@@ -1,0 +1,37 @@
+{
+  "name": "stophy",
+  "version": "0.1.0",
+  "description": "CLI for the Stophy YouTube data API — search, transcripts, comments, channels, trending, and more",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "stophy": "./src/index.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stophydotdev/stophy-cli"
+  },
+  "keywords": [
+    "youtube",
+    "api",
+    "cli",
+    "transcript",
+    "search",
+    "video",
+    "data"
+  ],
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^14.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}
