@@ -1,5 +1,5 @@
 {
-  "name": "@stophydotdev/stophy",
+  "name": "stophy",
   "version": "0.1.1",
   "description": "CLI for the Stophy YouTube data API — search, transcripts, comments, channels, trending, and more",
   "license": "MIT",
