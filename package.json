@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "stophy": "./src/index.ts"
+    "stophy": "src/index.ts"
   },
   "files": [
     "src",
