@@ -5,10 +5,11 @@ CLI for the [Stophy](https://stophy.dev) YouTube data API — search, transcript
 ## Install
 
 ```
-npm install -g stophy
-# or
-bun install -g stophy
+bunx stophy               # run directly (recommended)
+npm install -g stophy     # global install
 ```
+
+Requires [Bun](https://bun.sh).
 
 ## Quick start
 
