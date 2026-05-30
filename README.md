@@ -124,6 +124,7 @@ stophy logs --days 30 --endpoint /v1/video
 | `stophy video replies` | Get comment replies |
 | `stophy channel` | Browse a channel's videos, shorts, playlists, or about page |
 | `stophy playlist` | Get all videos in a playlist with full metadata |
+| `stophy credits` | Show your remaining credit balance |
 | `stophy usage` | Show API usage for your key |
 | `stophy logs` | Show request logs for your key |
 | `stophy view-config` | Show your current config and auth status |

@@ -4,6 +4,7 @@ import { Command } from "commander";
 import packageJson from "../package.json";
 import { registerAccountCommands } from "./commands/account";
 import { registerChannelCommand } from "./commands/channel";
+import { registerCreditsCommand } from "./commands/credits";
 import { registerLoginCommand } from "./commands/login";
 import { registerLogsCommand } from "./commands/logs";
 import { registerPlaylistCommand } from "./commands/playlist";
@@ -26,6 +27,7 @@ registerSearchCommand(program);
 registerVideoCommands(program);
 registerChannelCommand(program);
 registerPlaylistCommand(program);
+registerCreditsCommand(program);
 registerUsageCommand(program);
 registerLogsCommand(program);
 
