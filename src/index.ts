@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
 import { Command } from "commander";
 import packageJson from "../package.json";
@@ -8,8 +8,6 @@ import { registerLoginCommand } from "./commands/login";
 import { registerLogsCommand } from "./commands/logs";
 import { registerPlaylistCommand } from "./commands/playlist";
 import { registerSearchCommand } from "./commands/search";
-import { registerShortsCommand } from "./commands/shorts";
-import { registerTrendingCommand } from "./commands/trending";
 import { registerUsageCommand } from "./commands/usage";
 import { registerVideoCommands } from "./commands/video";
 import { toCliError } from "./errors";
@@ -28,8 +26,6 @@ registerSearchCommand(program);
 registerVideoCommands(program);
 registerChannelCommand(program);
 registerPlaylistCommand(program);
-registerTrendingCommand(program);
-registerShortsCommand(program);
 registerUsageCommand(program);
 registerLogsCommand(program);
 

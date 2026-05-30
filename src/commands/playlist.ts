@@ -5,7 +5,7 @@ import { printJson } from "../output";
 export function registerPlaylistCommand(program: Command) {
 	program
 		.command("playlist")
-		.description("Fetch playlist details and videos")
+		.description("Get all videos in a playlist with full metadata")
 		.requiredOption("--url <url>", "YouTube playlist URL")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")

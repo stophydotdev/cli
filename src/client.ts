@@ -38,12 +38,12 @@ export interface RequestOptions {
 }
 
 export async function request<T>(
-	options: RequestOptions
+	options: RequestOptions,
 ): Promise<RequestResult<T>> {
 	const { apiKey, baseUrl, sessionCookie } = await resolveRuntimeConfig();
 	if (!(apiKey || sessionCookie)) {
 		throw new CliError(
-			"Missing API key. Run `stophy login --api-key` or `stophy login --browser`."
+			"Missing API key. Run `stophy login --api-key` or `stophy login --browser`.",
 		);
 	}
 
@@ -69,7 +69,7 @@ export async function request<T>(
 		});
 	} catch (error) {
 		throw new CliError(
-			`Network request failed for ${url.toString()}: ${(error as Error).message}`
+			`Network request failed for ${url.toString()}: ${(error as Error).message}`,
 		);
 	}
 
@@ -78,7 +78,7 @@ export async function request<T>(
 		raw = await response.json();
 	} catch {
 		throw new CliError(
-			`Server returned a non-JSON response with status ${response.status}.`
+			`Server returned a non-JSON response with status ${response.status}.`,
 		);
 	}
 
@@ -95,7 +95,7 @@ export async function request<T>(
 				? failure.error
 				: `Request failed with status ${response.status}.`,
 			1,
-			{ rateLimit, status: response.status }
+			{ rateLimit, status: response.status },
 		);
 	}
 

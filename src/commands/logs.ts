@@ -8,7 +8,7 @@ const VALID_DAYS = new Set(["today", "7", "30"]);
 export function registerLogsCommand(program: Command) {
 	program
 		.command("logs")
-		.description("Fetch request logs for the current API key")
+		.description("Show request logs for your key")
 		.option("--days <days>", "today, 7, or 30", "7")
 		.option("--endpoint <endpoint>")
 		.option("--json", "Print raw JSON")

@@ -4,7 +4,9 @@ import { CliError } from "../errors";
 import { printJson } from "../output";
 
 export function registerVideoCommands(program: Command) {
-	const video = program.command("video").description("Video endpoints");
+	const video = program
+		.command("video")
+		.description("Get video details, transcript, comments, or replies");
 
 	video
 		.command("details")

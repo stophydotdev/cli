@@ -15,7 +15,11 @@ export interface CliConfig {
 
 export const DEFAULT_BASE_URL = "https://api.stophy.dev";
 export const DEFAULT_FRONTEND_URL = "https://stophy.dev";
-const CONFIG_PATH = join(homedir(), ".config", "stophy", "config.json");
+const CONFIG_DIR =
+	process.platform === "win32"
+		? join(process.env.APPDATA ?? homedir(), "stophy")
+		: join(homedir(), ".config", "stophy");
+const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 
 export function getConfigPath() {
 	return CONFIG_PATH;
@@ -45,7 +49,7 @@ export async function saveConfig(config: CliConfig) {
 	await writeFile(
 		`${CONFIG_PATH}.tmp`,
 		`${JSON.stringify(config, null, 2)}\n`,
-		"utf8"
+		"utf8",
 	);
 	await rename(`${CONFIG_PATH}.tmp`, CONFIG_PATH);
 }
@@ -149,7 +153,7 @@ export function getBrowserLoginUrl(
 	baseUrl: string,
 	frontendUrl: string,
 	cliPort: number,
-	cliState: string
+	cliState: string,
 ) {
 	const loginUrl = new URL(getDashboardLoginUrl(baseUrl, frontendUrl));
 	const callbackUrl = new URL("/cli/complete", loginUrl.origin);

@@ -8,7 +8,7 @@ const VALID_DAYS = new Set(["today", "7", "30"]);
 export function registerUsageCommand(program: Command) {
 	program
 		.command("usage")
-		.description("Fetch API usage for the current API key")
+		.description("Show API usage for your key")
 		.option("--days <days>", "today, 7, or 30", "7")
 		.option("--json", "Print raw JSON")
 		.action(async (options) => {

@@ -6,7 +6,7 @@ import { printJson } from "../output";
 export function registerSearchCommand(program: Command) {
 	program
 		.command("search")
-		.description("Search YouTube data through Stophy")
+		.description("Search YouTube videos, channels, and playlists")
 		.requiredOption("--q <query>", "Search query")
 		.option("--type <type>")
 		.option("--sortBy <sortBy>")

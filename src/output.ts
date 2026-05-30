@@ -50,7 +50,7 @@ function printFooter<T>(result: RequestResult<T>) {
 		rows.map((row) => ({
 			Metric: green(row.Metric),
 			Value: green(row.Value),
-		}))
+		})),
 	);
 }
 
@@ -60,7 +60,7 @@ export function printJson(value: unknown) {
 
 export function printUsage(
 	result: RequestResult<{ items: Record<string, unknown>[] }>,
-	json = false
+	json = false,
 ) {
 	if (json) {
 		printJson(result.body);
@@ -72,7 +72,7 @@ export function printUsage(
 			date: item.date,
 			requests: item.requests,
 			credits: item.credits,
-		}))
+		})),
 	);
 	printFooter(result);
 }
@@ -82,7 +82,7 @@ export function printLogs(
 		endpoints: string[];
 		logs: Record<string, unknown>[];
 	}>,
-	json = false
+	json = false,
 ) {
 	if (json) {
 		printJson(result.body);
@@ -97,7 +97,7 @@ export function printLogs(
 			credits: log.credits,
 			createdAt: formatTimestamp(log.createdAt),
 			apiKey: log.apiKeyName ?? "-",
-		}))
+		})),
 	);
 	printFooter(result);
 }

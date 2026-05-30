@@ -30,7 +30,7 @@ function formatStatus(apiKey?: string, sessionCookie?: string) {
 export function registerAccountCommands(program: Command) {
 	program
 		.command("view-config")
-		.description("Show current Stophy CLI configuration")
+		.description("Show your current config and auth status")
 		.action(async () => {
 			const stored = await loadConfig();
 			const runtime = await resolveRuntimeConfig();
@@ -40,11 +40,11 @@ export function registerAccountCommands(program: Command) {
 			console.log("└─────────────────────────────────────────┘");
 			console.log("");
 			console.log(
-				`Status:        ${formatStatus(runtime.apiKey, stored.sessionCookie)}`
+				`Status:        ${formatStatus(runtime.apiKey, stored.sessionCookie)}`,
 			);
 			console.log(`API Key:       ${maskSecret(runtime.apiKey)}`);
 			console.log(
-				`Session:       ${hasSessionCookie(stored.sessionCookie) ? green("Saved") : "Not saved"}`
+				`Session:       ${hasSessionCookie(stored.sessionCookie) ? green("Saved") : "Not saved"}`,
 			);
 			console.log(`API URL:       ${runtime.baseUrl}`);
 			console.log(`Frontend URL:  ${runtime.frontendUrl}`);
@@ -57,7 +57,7 @@ export function registerAccountCommands(program: Command) {
 
 	program
 		.command("logout")
-		.description("Clear saved Stophy credentials")
+		.description("Clear saved credentials")
 		.action(async () => {
 			await clearStoredAuth();
 			console.log(green("Cleared saved Stophy credentials."));

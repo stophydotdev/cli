@@ -25,7 +25,7 @@ function jsonResponse(body: Record<string, unknown>) {
 }
 
 export async function startBrowserLogin(
-	timeoutMs = 5 * 60 * 1000
+	timeoutMs = 5 * 60 * 1000,
 ): Promise<BrowserLoginServer> {
 	const state = randomUUID();
 
@@ -104,7 +104,7 @@ export async function startBrowserLogin(
 			(resolveResult, rejectResult) => {
 				finish = resolveResult;
 				fail = rejectResult;
-			}
+			},
 		);
 
 		server.listen(0, "127.0.0.1", () => {
@@ -120,7 +120,7 @@ export async function startBrowserLogin(
 		const timeout = setTimeout(() => {
 			server.close();
 			const error = new CliError(
-				"Browser login timed out. Try `stophy login --browser` again."
+				"Browser login timed out. Try `stophy login --browser` again.",
 			);
 			fail(error);
 		}, timeoutMs);

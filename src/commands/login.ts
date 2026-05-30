@@ -29,7 +29,7 @@ async function promptForLoginMode(): Promise<LoginMode> {
 	console.log("YouTube data for AI agents");
 	console.log("");
 	console.log(
-		"Welcome! To get started, authenticate with your Stophy account."
+		"Welcome! To get started, authenticate with your Stophy account.",
 	);
 	console.log("");
 	console.log("  1. Login with browser (recommended)");
@@ -141,7 +141,7 @@ async function handleApiKeyLogin(apiKeyOption?: boolean | string) {
 export function registerLoginCommand(program: Command) {
 	program
 		.command("login")
-		.description("Authenticate with your Stophy account")
+		.description("Log in to your Stophy account")
 		.option("--browser", "Open the Stophy login page in your browser")
 		.option("--api-key [key]", "Store an API key directly")
 		.action(
@@ -153,6 +153,6 @@ export function registerLoginCommand(program: Command) {
 				}
 
 				await handleApiKeyLogin(options.apiKey);
-			}
+			},
 		);
 }

@@ -5,7 +5,7 @@ import { printJson } from "../output";
 export function registerChannelCommand(program: Command) {
 	program
 		.command("channel")
-		.description("Fetch channel profile and tab data")
+		.description("Browse a channel's videos, shorts, playlists, or about page")
 		.requiredOption("--url <url>", "YouTube channel URL")
 		.option("--tab <tab>")
 		.option("--continuation-token <token>")
