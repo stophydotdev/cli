@@ -1,6 +1,6 @@
 {
   "name": "stophy-cli",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Search, extract and analyze YouTube from the terminal",
   "license": "MIT",
   "type": "module",
