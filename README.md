@@ -8,7 +8,7 @@ CLI for the [Stophy](https://stophy.dev) YouTube data API. Search videos, get tr
 npm install -g stophy
 ```
 
-Requires Node.js 18 or later. Get an API key from [stophy.dev/dashboard](https://stophy.dev/dashboard).
+Requires Node.js 18 or later. Get an API key from [stophy.dev/dashboard](https://stophy.dev).
 
 ## Auth
 

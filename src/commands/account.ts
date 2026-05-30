@@ -27,6 +27,12 @@ function formatStatus(apiKey?: string, sessionCookie?: string) {
 		: "Not authenticated";
 }
 
+function formatApiKeySource(source?: "env" | "stored") {
+	if (source === "env") return " (via STOPHY_API_KEY)";
+	if (source === "stored") return " (via stored credentials)";
+	return "";
+}
+
 export function registerAccountCommands(program: Command) {
 	program
 		.command("view-config")
@@ -34,25 +40,31 @@ export function registerAccountCommands(program: Command) {
 		.action(async () => {
 			const stored = await loadConfig();
 			const runtime = await resolveRuntimeConfig();
+			const isAuthed = Boolean(runtime.apiKey || stored.sessionCookie?.trim());
 
-			console.log("┌─────────────────────────────────────────┐");
-			console.log("│          Stophy Configuration           │");
-			console.log("└─────────────────────────────────────────┘");
-			console.log("");
-			console.log(
-				`Status:        ${formatStatus(runtime.apiKey, stored.sessionCookie)}`,
-			);
-			console.log(`API Key:       ${maskSecret(runtime.apiKey)}`);
-			console.log(
-				`Session:       ${hasSessionCookie(stored.sessionCookie) ? green("Saved") : "Not saved"}`,
-			);
-			console.log(`API URL:       ${runtime.baseUrl}`);
-			console.log(`Frontend URL:  ${runtime.frontendUrl}`);
-			console.log(`Config:        ${getConfigPath()}`);
-			console.log("");
-			console.log("Commands:");
-			console.log("  stophy logout       Clear credentials");
-			console.log("  stophy login        Re-authenticate");
+			process.stderr.write("┌─────────────────────────────────────────┐\n");
+			process.stderr.write("│          Stophy Configuration           │\n");
+			process.stderr.write("└─────────────────────────────────────────┘\n");
+			process.stderr.write("\n");
+			process.stderr.write(`Status: ${formatStatus(runtime.apiKey, stored.sessionCookie)}\n`);
+			process.stderr.write("\n");
+
+			if (isAuthed) {
+				process.stderr.write(`API Key:       ${maskSecret(runtime.apiKey)}${formatApiKeySource(runtime.apiKeySource)}\n`);
+				process.stderr.write(
+					`Session:       ${hasSessionCookie(stored.sessionCookie) ? green("Saved") : "Not saved"}\n`,
+				);
+				process.stderr.write(`API URL:       ${runtime.baseUrl}\n`);
+				process.stderr.write(`Frontend URL:  ${runtime.frontendUrl}\n`);
+				process.stderr.write(`Config:        ${getConfigPath()}\n`);
+				process.stderr.write("\n");
+				process.stderr.write("Commands:\n");
+				process.stderr.write("  stophy logout       Clear credentials\n");
+				process.stderr.write("  stophy login        Re-authenticate\n");
+			} else {
+				process.stderr.write("Run any command to start authentication, or use:\n");
+				process.stderr.write("  stophy login        Authenticate with browser or API key\n");
+			}
 		});
 
 	program
@@ -60,6 +72,6 @@ export function registerAccountCommands(program: Command) {
 		.description("Clear saved credentials")
 		.action(async () => {
 			await clearStoredAuth();
-			console.log(green("Cleared saved Stophy credentials."));
+			process.stderr.write(green("Cleared saved Stophy credentials.\n"));
 		});
 }

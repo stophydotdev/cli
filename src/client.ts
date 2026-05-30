@@ -41,11 +41,6 @@ export async function request<T>(
 	options: RequestOptions,
 ): Promise<RequestResult<T>> {
 	const { apiKey, baseUrl, sessionCookie } = await resolveRuntimeConfig();
-	if (!(apiKey || sessionCookie)) {
-		throw new CliError(
-			"Missing API key. Run `stophy login --api-key` or `stophy login --browser`.",
-		);
-	}
 
 	const url = new URL(options.path, `${baseUrl}/`);
 	for (const [key, value] of Object.entries(options.params ?? {})) {

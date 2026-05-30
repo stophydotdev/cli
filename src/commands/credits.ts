@@ -7,6 +7,11 @@ export function registerCreditsCommand(program: Command) {
 		.command("credits")
 		.description("Show your remaining credit balance")
 		.option("--json", "Print raw JSON")
+		.addHelpText("after", `
+Examples:
+  $ stophy credits
+  $ stophy credits --json
+`)
 		.action(async (options) => {
 			const result = await request<{ credits: number }>({
 				method: "GET",

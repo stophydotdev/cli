@@ -19,7 +19,7 @@ Browse a channel's videos, shorts, playlists, or about page.
 # Latest videos from a channel
 stophy channel --url "https://youtube.com/@fireship"
 
-# Most popular videos
+# Most popular videos (--sortBy only applies to --tab video)
 stophy channel --url "https://youtube.com/@fireship" --tab video --sortBy popular
 
 # Channel about page (subscriber count, description, links)
@@ -41,13 +41,13 @@ stophy channel --url "https://youtube.com/@fireship" --continuation-token <token
 |--------|--------|-------------|
 | `--url <url>` | YouTube channel URL | Channel URL or @handle (required) |
 | `--tab <tab>` | video, short, playlist, about | Which tab to fetch (default: video) |
-| `--sortBy <sort>` | latest, popular, oldest | Sort order for the videos tab |
+| `--sortBy <sort>` | latest, popular, oldest | Sort order — only applies when `--tab video` |
 | `--continuation-token <token>` | | Paginate from a previous response |
 
 ## Tips
 
 - Use `--tab about` to get subscriber count, description, and social links without listing videos.
-- Use `--sortBy popular` to surface a channel's highest-performing content.
+- Use `--tab video --sortBy popular` to surface a channel's highest-performing content. `--sortBy` has no effect on other tabs.
 - Response includes a `continuationToken` when more results are available.
 
 ## See also

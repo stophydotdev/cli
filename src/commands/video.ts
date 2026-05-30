@@ -10,8 +10,14 @@ export function registerVideoCommands(program: Command) {
 
 	video
 		.command("details")
+		.description("Get metadata for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
 		.option("--json", "Print raw JSON")
+		.addHelpText("after", `
+Examples:
+  $ stophy video details --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
+  $ stophy video details --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.title'
+`)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
@@ -23,8 +29,14 @@ export function registerVideoCommands(program: Command) {
 
 	video
 		.command("transcript")
+		.description("Get the transcript/captions for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
 		.option("--json", "Print raw JSON")
+		.addHelpText("after", `
+Examples:
+  $ stophy video transcript --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
+  $ stophy video transcript --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.transcript'
+`)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
@@ -36,10 +48,17 @@ export function registerVideoCommands(program: Command) {
 
 	video
 		.command("comments")
+		.description("Get comments for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
 		.option("--sortBy <sortBy>", "top or latest")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
+		.addHelpText("after", `
+Examples:
+  $ stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
+  $ stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --sortBy top
+  $ stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.comments[0].text'
+`)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
@@ -56,8 +75,13 @@ export function registerVideoCommands(program: Command) {
 
 	video
 		.command("replies")
+		.description("Get replies to a comment using a continuation token")
 		.requiredOption("--continuation-token <token>", "Reply continuation token")
 		.option("--json", "Print raw JSON")
+		.addHelpText("after", `
+Examples:
+  $ stophy video replies --continuation-token "<token from comments response>"
+`)
 		.action(async (options) => {
 			if (!options.continuationToken?.trim()) {
 				throw new CliError("`--continuation-token` is required.");

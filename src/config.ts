@@ -1,4 +1,4 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { CliError } from "./errors";
@@ -44,12 +44,10 @@ export async function loadConfig(): Promise<CliConfig> {
 
 export async function saveConfig(config: CliConfig) {
 	await mkdir(dirname(CONFIG_PATH), { recursive: true });
-	await writeFile(
-		`${CONFIG_PATH}.tmp`,
-		`${JSON.stringify(config, null, 2)}\n`,
-		"utf8",
-	);
-	await rename(`${CONFIG_PATH}.tmp`, CONFIG_PATH);
+	const tmp = `${CONFIG_PATH}.tmp`;
+	await writeFile(tmp, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+	await chmod(tmp, 0o600);
+	await rename(tmp, CONFIG_PATH);
 }
 
 export async function setStoredApiKey(apiKey: string) {
@@ -71,7 +69,13 @@ export async function clearStoredAuth() {
 
 export async function resolveRuntimeConfig() {
 	const config = await loadConfig();
-	const apiKey = normalizeApiKey(process.env.STOPHY_API_KEY ?? config.apiKey);
+	const envApiKey = normalizeApiKey(process.env.STOPHY_API_KEY);
+	const apiKey = envApiKey ?? normalizeApiKey(config.apiKey);
+	const apiKeySource: "env" | "stored" | undefined = envApiKey
+		? "env"
+		: config.apiKey
+			? "stored"
+			: undefined;
 	const baseUrl =
 		normalizeBaseUrl(process.env.STOPHY_BASE_URL ?? config.baseUrl) ??
 		DEFAULT_BASE_URL;
@@ -80,6 +84,7 @@ export async function resolveRuntimeConfig() {
 		DEFAULT_FRONTEND_URL;
 	return {
 		apiKey,
+		apiKeySource,
 		baseUrl,
 		frontendUrl,
 		sessionCookie: normalizeSessionCookie(config.sessionCookie),

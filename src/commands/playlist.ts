@@ -9,6 +9,11 @@ export function registerPlaylistCommand(program: Command) {
 		.requiredOption("--url <url>", "YouTube playlist URL")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
+		.addHelpText("after", `
+Examples:
+  $ stophy playlist --url "https://youtube.com/playlist?list=PLxxxxxx"
+  $ stophy playlist --url "https://youtube.com/playlist?list=PLxxxxxx" --json | jq '.data.videos[].title'
+`)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
