@@ -101,16 +101,12 @@ async function handleBrowserLogin() {
 	const { port, state } = pending;
 	const loginUrl = getBrowserLoginUrl(baseUrl, frontendUrl, port, state);
 
-	console.log("Authorizing Stophy CLI");
-	console.log("Opening browser for authentication...");
-	const opened = await tryOpenBrowser(loginUrl);
-	if (!opened) {
-		console.error("Could not open your browser automatically.");
-	}
-	console.log(green(`If the browser doesn't open, visit: ${loginUrl}`));
 	console.log("");
-	console.log("Authorizing Stophy CLI in your browser...");
-	console.log("Waiting for browser authentication...");
+	console.log(green(loginUrl));
+	console.log("");
+	await prompt("Press Enter to open your browser...");
+	await tryOpenBrowser(loginUrl);
+	console.log("Waiting for authorization in your browser...");
 
 	const result = await pending.result;
 	const current = await loadConfig();

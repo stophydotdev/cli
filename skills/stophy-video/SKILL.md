@@ -1,7 +1,9 @@
 ---
 name: stophy-video
-description: |
-  Get details, full transcript with timestamps, comments, or comment replies for any YouTube video URL. Use when the user provides a YouTube URL and wants its content, says "get the transcript", "summarize this video", "what are people saying in the comments", "read the comments on", or needs to analyze video content. Transcripts are only available for videos with captions.
+description: Get full transcripts with timestamps, comments, replies, and metadata for any YouTube video. Use when the user provides a YouTube URL and says "get the transcript", "summarize this video", "what are people saying in the comments", or needs to analyze a specific video.
+metadata:
+  author: stophy
+  version: "0.1.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)
@@ -15,19 +17,19 @@ Get details, transcript, comments, or replies for a YouTube video.
 
 ```bash
 # Video metadata (title, views, description, channel)
-stophy video details --url "https://youtube.com/watch?v=dQw4w9WgXcQ"
+stophy video details --url "https://www.youtube.com/watch?v=kK-iR6g-V1g"
 
 # Full transcript with timestamps
-stophy video transcript --url "https://youtube.com/watch?v=dQw4w9WgXcQ"
+stophy video transcript --url "https://www.youtube.com/watch?v=kK-iR6g-V1g"
 
 # Top comments
-stophy video comments --url "https://youtube.com/watch?v=dQw4w9WgXcQ" --sortBy top
+stophy video comments --url "https://www.youtube.com/watch?v=kK-iR6g-V1g" --sortBy top
 
 # Latest comments
-stophy video comments --url "https://youtube.com/watch?v=dQw4w9WgXcQ" --sortBy latest
+stophy video comments --url "hhttps://www.youtube.com/watch?v=kK-iR6g-V1g" --sortBy latest
 
 # Paginate comments
-stophy video comments --url "https://youtube.com/watch?v=dQw4w9WgXcQ" --continuation-token <token>
+stophy video comments --url "https://www.youtube.com/watch?v=kK-iR6g-V1g" --continuation-token <token>
 
 # Replies to a comment (use repliesToken from comment response)
 stophy video replies --continuation-token <repliesToken>

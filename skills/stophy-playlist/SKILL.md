@@ -1,7 +1,9 @@
 ---
 name: stophy-playlist
-description: |
-  Fetch all videos in a YouTube playlist with full metadata. Use when the user provides a YouTube playlist URL, says "get all videos in this playlist", "what's in this playlist", "list the videos from this course", or needs to process a curated collection of videos.
+description: Fetch all videos in a YouTube playlist with full metadata including titles, durations, and view counts. Use when the user provides a YouTube playlist URL, says "what's in this playlist", "get all videos from this course", or needs to process a curated collection of videos.
+metadata:
+  author: stophy
+  version: "0.1.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)

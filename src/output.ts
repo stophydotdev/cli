@@ -1,5 +1,4 @@
 import type { RequestResult } from "./client";
-import { green } from "./color";
 
 type Jsonish =
 	| null
@@ -27,33 +26,6 @@ function formatTimestamp(value: unknown) {
 	return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
-function printFooter<T>(result: RequestResult<T>) {
-	const rows: { Metric: string; Value: string }[] = [
-		{
-			Metric: "Credits Left",
-			Value: String(result.body.credit.remain),
-		},
-	];
-
-	if (result.rateLimit.remaining) {
-		rows.push({
-			Metric: "Rate Limit",
-			Value: `${result.rateLimit.remaining}/${result.rateLimit.limit ?? "?"} per min`,
-		});
-	}
-
-	if (result.body.credit.used > 0) {
-		rows.push({ Metric: "Cache", Value: result.body.cache });
-	}
-
-	console.table(
-		rows.map((row) => ({
-			Metric: green(row.Metric),
-			Value: green(row.Value),
-		})),
-	);
-}
-
 export function printJson(value: unknown) {
 	console.log(JSON.stringify(value as Jsonish, null, 2));
 }
@@ -74,7 +46,6 @@ export function printUsage(
 			credits: item.credits,
 		})),
 	);
-	printFooter(result);
 }
 
 export function printLogs(
@@ -99,5 +70,4 @@ export function printLogs(
 			apiKey: log.apiKeyName ?? "-",
 		})),
 	);
-	printFooter(result);
 }

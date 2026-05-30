@@ -1,7 +1,9 @@
 ---
 name: stophy-search
-description: |
-  Search YouTube for videos, shorts, channels, or playlists by keyword. Use when the user wants to find YouTube content, says "search YouTube", "find videos about", "what are the top tutorials on", "find channels about", or needs to discover content before going deeper. Supports filtering by upload date, duration, type, and sort order.
+description: Search YouTube for videos, shorts, channels, or playlists by keyword with filters for date, duration, type, and sort order. Use when the user says "search YouTube", "find videos about X", "what are the top videos on X", or needs to discover content before going deeper.
+metadata:
+  author: stophy
+  version: "0.1.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)
@@ -15,19 +17,19 @@ Search YouTube by keyword with filters for type, date, and duration.
 
 ```bash
 # Basic search
-stophy search --q "react tutorial"
+stophy search --q "How to make money in 2026"
 
 # Filter by type and sort by popularity
-stophy search --q "typescript tutorial" --type video --sortBy popularity
+stophy search --q "Claude Code" --type video --sortBy popularity
 
 # Recent results only
-stophy search --q "next.js 15" --uploadDate week
+stophy search --q "Hermes Agent" --uploadDate week
 
 # Long videos only
-stophy search --q "docker tutorial" --duration long
+stophy search --q "Python for beginners" --duration long
 
 # Paginate results
-stophy search --q "machine learning" --continuation-token <token>
+stophy search --q "Typescript for dummies" --continuation-token <token>
 ```
 
 ## Options

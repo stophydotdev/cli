@@ -3,8 +3,6 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { CliError } from "./errors";
 
-const TRAILING_SLASH = /\/$/;
-
 export interface CliConfig {
 	apiKey?: string;
 	baseUrl?: string;
@@ -122,44 +120,15 @@ export function validateApiKey(apiKey: string) {
 	return apiKey;
 }
 
-export function getDashboardLoginUrl(baseUrl: string, frontendUrl?: string) {
-	if (frontendUrl) {
-		try {
-			const url = new URL(frontendUrl);
-			return `${url.origin}/login`;
-		} catch {
-			return `${frontendUrl.replace(TRAILING_SLASH, "")}/login`;
-		}
-	}
-
-	try {
-		const url = new URL(baseUrl);
-		if (url.hostname === "api.stophy.dev") {
-			return "https://stophy.dev/login";
-		}
-		if (url.hostname === "localhost" && url.port === "3000") {
-			return "http://localhost:3001/login";
-		}
-		if (url.hostname.startsWith("api.")) {
-			return `${url.protocol}//${url.hostname.slice(4)}/login`;
-		}
-		return `${url.origin}/login`;
-	} catch {
-		return "https://stophy.dev/login";
-	}
-}
-
 export function getBrowserLoginUrl(
 	baseUrl: string,
 	frontendUrl: string,
 	cliPort: number,
 	cliState: string,
 ) {
-	const loginUrl = new URL(getDashboardLoginUrl(baseUrl, frontendUrl));
-	const callbackUrl = new URL("/cli/complete", loginUrl.origin);
-	callbackUrl.searchParams.set("cliPort", String(cliPort));
-	callbackUrl.searchParams.set("cliState", cliState);
-	callbackUrl.searchParams.set("apiBaseUrl", baseUrl);
-	loginUrl.searchParams.set("callbackUrl", callbackUrl.toString());
-	return loginUrl.toString();
+	const url = new URL("/cli/complete", frontendUrl);
+	url.searchParams.set("cliPort", String(cliPort));
+	url.searchParams.set("cliState", cliState);
+	url.searchParams.set("apiBaseUrl", baseUrl);
+	return url.toString();
 }

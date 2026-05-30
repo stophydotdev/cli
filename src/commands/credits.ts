@@ -15,9 +15,7 @@ export function registerCreditsCommand(program: Command) {
 			if (options.json) {
 				printJson(result.body);
 			} else {
-				console.log(
-					`Credits remaining: ${result.body.data?.credits}`,
-				);
+				console.log(`Credits remaining: ${result.body.data?.credits}`);
 			}
 		});
 }

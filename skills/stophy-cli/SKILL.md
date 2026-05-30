@@ -1,7 +1,9 @@
 ---
 name: stophy-cli
-description: |
-  Extract YouTube data from the command line: search videos, get transcripts, read comments, browse channels, and fetch playlists. Use when the user wants YouTube data, says "find YouTube videos", "get the transcript", "what are people saying in the comments", "browse this channel", or provides a YouTube URL and needs its content. Requires a Stophy API key.
+description: Search, extract, and analyze YouTube data from the command line using the Stophy API. Use when the user wants YouTube content — transcripts, comments, search results, channels, or playlists — or provides a YouTube URL and needs its content analyzed.
+metadata:
+  author: stophy
+  version: "0.1.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)
@@ -31,7 +33,12 @@ Or set the environment variable: `STOPHY_API_KEY=st_xxx`
 
 ## Credits
 
-Each command call uses one credit. Check balance with `stophy usage`.
+Each command call uses one credit. Check balance with `stophy credits` (free).
+
+```bash
+stophy credits
+# Credits remaining: 39142
+```
 
 ## Skills
 

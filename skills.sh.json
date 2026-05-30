@@ -1,0 +1,16 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "groupings": [
+    {
+      "title": "Stophy",
+      "description": "Skills for extracting and analyzing YouTube data with the Stophy CLI.",
+      "skills": [
+        "stophy-cli",
+        "stophy-search",
+        "stophy-video",
+        "stophy-channel",
+        "stophy-playlist"
+      ]
+    }
+  ]
+}

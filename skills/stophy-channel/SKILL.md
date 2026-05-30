@@ -1,7 +1,9 @@
 ---
 name: stophy-channel
-description: |
-  Browse a YouTube channel's videos, shorts, playlists, or about page. Use when the user provides a YouTube channel URL or @handle and wants its content, says "show me videos from this channel", "what has @name uploaded", "get the about page for", "browse this channel", or needs to explore a creator's catalog sorted by popularity or date.
+description: Browse a YouTube channel's videos, shorts, playlists, and about page sorted by popularity or date. Use when the user provides a YouTube channel URL or @handle, says "show me videos from this channel", "what has @name uploaded recently", or needs to explore a creator's catalog.
+metadata:
+  author: stophy
+  version: "0.1.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)
