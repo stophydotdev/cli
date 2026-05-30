@@ -5,7 +5,7 @@ CLI for the [Stophy](https://stophy.dev) YouTube data API. Search videos, get tr
 ## Install
 
 ```bash
-npm install -g stophy
+npm install -g stophy-cli
 ```
 
 Requires Node.js 18 or later. Get an API key from [stophy.dev/dashboard](https://stophy.dev).
@@ -23,7 +23,7 @@ export STOPHY_API_KEY="st_..."   # or set env var
 ### search
 
 ```bash
-stophy search --q "typescript tutorial" --type video --sortBy popularity
+stophy search --q "typescript tutorial" --type video --sortBy viewCount
 stophy search --q "next.js" --uploadDate week --duration long
 ```
 
@@ -118,6 +118,7 @@ stophy logs --days 30 --endpoint /v1/video
 |---------|-------------|
 | `stophy login` | Log in to your Stophy account |
 | `stophy search` | Search YouTube videos, channels, and playlists |
+| `stophy suggest` | Get YouTube search autocomplete suggestions |
 | `stophy video details` | Get video metadata |
 | `stophy video transcript` | Get timestamped transcript |
 | `stophy video comments` | Get paginated comments |
