@@ -3,7 +3,7 @@ name: stophy-search
 description: Search YouTube for videos, shorts, channels, or playlists by keyword with filters for date, duration, type, and sort order. Use when the user says "search YouTube", "find videos about X", "what are the top videos on X", or needs to discover content before going deeper.
 metadata:
   author: stophy
-  version: "0.1.0"
+  version: "1.0.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)
@@ -11,25 +11,25 @@ allowed-tools:
 
 # stophy search
 
-Search YouTube by keyword with filters for type, date, and duration.
+Search YouTube by keyword with filters for type, date, duration, and sort order.
 
 ## Quick start
 
 ```bash
 # Basic search
-stophy search --q "How to make money in 2026"
+stophy search --q "how to build a SaaS"
 
-# Filter by type and sort by popularity
-stophy search --q "Claude Code" --type video --sortBy popularity
+# Filter by type and sort by views
+stophy search --q "Claude Code" --type video --sortBy viewCount
 
 # Recent results only
-stophy search --q "Hermes Agent" --uploadDate week
+stophy search --q "AI news" --uploadDate week
 
-# Long videos only
+# Long-form content only
 stophy search --q "Python for beginners" --duration long
 
 # Paginate results
-stophy search --q "Typescript for dummies" --continuation-token <token>
+stophy search --q "typescript" --continuation-token <token>
 ```
 
 ## Options
@@ -37,17 +37,19 @@ stophy search --q "Typescript for dummies" --continuation-token <token>
 | Option | Values | Description |
 |--------|--------|-------------|
 | `--q <query>` | any | Search query (required) |
-| `--type <type>` | video, short, channel, playlist, movie | Content type |
-| `--sortBy <sort>` | relevance, popularity, date, rating | Sort order |
-| `--uploadDate <date>` | today, week, month, year | Upload recency filter |
-| `--duration <duration>` | short, medium, long | Under 3 min / 3-20 min / over 20 min |
-| `--continuation-token <token>` | | Paginate from a previous response |
+| `--type <type>` | video, channel, playlist | Content type filter |
+| `--sortBy <sort>` | relevance, uploadDate, viewCount, rating | Sort order |
+| `--uploadDate <date>` | hour, today, week, month, year | Upload recency filter |
+| `--duration <duration>` | short, medium, long | Under 4 min / 4–20 min / over 20 min |
+| `--continuation-token <token>` | string | Paginate from a previous response |
+| `--json` | — | Print raw JSON |
 
 ## Tips
 
-- Use `--sortBy popularity` to find the most-watched content on a topic.
-- Use `--uploadDate week` combined with `--sortBy date` for the latest uploads.
+- Use `--sortBy viewCount` to surface the most-watched content on a topic.
+- Use `--uploadDate week` for the latest uploads on a fast-moving topic.
 - The response includes a `continuationToken` for fetching the next page.
+- Combine with `stophy suggest` to expand a partial query before searching.
 
 ## See also
 

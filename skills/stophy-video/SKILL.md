@@ -3,7 +3,7 @@ name: stophy-video
 description: Get full transcripts with timestamps, comments, replies, and metadata for any YouTube video. Use when the user provides a YouTube URL and says "get the transcript", "summarize this video", "what are people saying in the comments", or needs to analyze a specific video.
 metadata:
   author: stophy
-  version: "0.1.0"
+  version: "1.0.0"
 allowed-tools:
   - Bash(stophy *)
   - Bash(npx stophy *)
@@ -17,19 +17,19 @@ Get details, transcript, comments, or replies for a YouTube video.
 
 ```bash
 # Video metadata (title, views, description, channel)
-stophy video details --url "https://www.youtube.com/watch?v=kK-iR6g-V1g"
+stophy video details --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
 
 # Full transcript with timestamps
-stophy video transcript --url "https://www.youtube.com/watch?v=kK-iR6g-V1g"
+stophy video transcript --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
 
 # Top comments
-stophy video comments --url "https://www.youtube.com/watch?v=kK-iR6g-V1g" --sortBy top
+stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --sortBy top
 
 # Latest comments
-stophy video comments --url "hhttps://www.youtube.com/watch?v=kK-iR6g-V1g" --sortBy latest
+stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --sortBy latest
 
 # Paginate comments
-stophy video comments --url "https://www.youtube.com/watch?v=kK-iR6g-V1g" --continuation-token <token>
+stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --continuation-token <token>
 
 # Replies to a comment (use repliesToken from comment response)
 stophy video replies --continuation-token <repliesToken>
@@ -41,7 +41,8 @@ stophy video replies --continuation-token <repliesToken>
 |--------|--------|-------------|
 | `--url <url>` | YouTube video URL | Required for details, transcript, comments |
 | `--sortBy <sort>` | top, latest | Comment sort order |
-| `--continuation-token <token>` | | Paginate comments or fetch replies |
+| `--continuation-token <token>` | string | Paginate comments or fetch replies |
+| `--json` | — | Print raw JSON |
 
 ## Response shapes
 
@@ -53,9 +54,9 @@ stophy video replies --continuation-token <repliesToken>
 
 ## Tips
 
-- Always use the full YouTube URL (e.g., `https://youtube.com/watch?v=...`).
 - Transcripts are only available for videos that have captions enabled.
-- To read a comment thread, use the `repliesToken` from the comment object with `stophy video replies`.
+- To read a full comment thread, use the `repliesToken` from a comment with `stophy video replies`.
+- Pipe transcript text into your agent: `stophy video transcript --url <url> --json | jq '.data.segments[].text' -r`
 
 ## See also
 
