@@ -37,7 +37,7 @@ stophy playlist --url "https://www.youtube.com/playlist?list=PLxxxxxx" --json \
 
 ## Response
 
-Returns `title`, `description`, `videoCount`, and `videos[]` — each with `title`, `url`, `duration`, `viewCount`, and `publishedAt`.
+Returns `title`, `description`, `videoCount`, and `videos[]`. Each video has `title`, `url`, `duration`, `viewCount`, and `publishedAt`.
 
 ## Tips
 

@@ -1,21 +1,21 @@
-# stophy
+# @stophy/cli
 
-CLI for the [Stophy](https://stophy.dev) YouTube data API. Search videos, get transcripts, read comments, browse channels, and fetch playlists. All output is JSON.
+YouTube for AI agents. Search, transcripts, comments, channels, playlists. All output is JSON. Pipe it into jq, scripts, or agents.
 
 ## Install
 
 ```bash
-npm install -g stophy-cli
+npm install -g @stophy/cli
 ```
 
-Requires Node.js 18 or later. Get an API key from [stophy.dev/dashboard](https://stophy.dev).
+Node.js 18 or later. Get an API key from [stophy.dev/dashboard](https://stophy.dev/dashboard).
 
 ## Auth
 
 ```bash
-stophy login --browser           # opens OAuth in browser (recommended)
-stophy login --api-key st_xxx    # paste API key directly
-export STOPHY_API_KEY="st_..."   # or set env var
+stophy login --browser           # opens browser
+stophy login --api-key st_xxx    # paste key directly
+export STOPHY_API_KEY="st_..."   # env var also works
 ```
 
 ## Commands
@@ -116,22 +116,38 @@ stophy logs --days 30 --endpoint /v1/video
 
 | Command | Description |
 |---------|-------------|
-| `stophy login` | Log in to your Stophy account |
-| `stophy search` | Search YouTube videos, channels, and playlists |
-| `stophy suggest` | Get YouTube search autocomplete suggestions |
-| `stophy video details` | Get video metadata |
-| `stophy video transcript` | Get timestamped transcript |
-| `stophy video comments` | Get paginated comments |
-| `stophy video replies` | Get comment replies |
-| `stophy channel` | Browse a channel's videos, shorts, playlists, or about page |
-| `stophy playlist` | Get all videos in a playlist with full metadata |
-| `stophy credits` | Show your remaining credit balance |
-| `stophy usage` | Show API usage for your key |
-| `stophy logs` | Show request logs for your key |
-| `stophy view-config` | Show your current config and auth status |
+| `stophy login` | Authenticate with API key or browser |
+| `stophy search` | Search YouTube by keyword |
+| `stophy suggest` | Search autocomplete suggestions |
+| `stophy video details` | Video metadata |
+| `stophy video transcript` | Timestamped transcript |
+| `stophy video comments` | Paginated comments |
+| `stophy video replies` | Comment replies |
+| `stophy channel` | Channel videos, shorts, playlists, or about |
+| `stophy playlist` | All videos in a playlist |
+| `stophy credits` | Remaining credit balance |
+| `stophy usage` | API usage for your key |
+| `stophy logs` | Request logs for your key |
+| `stophy view-config` | Config and auth status |
 | `stophy logout` | Clear saved credentials |
 
-Each command supports `--help` for full options. See [docs.stophy.dev](https://docs.stophy.dev) for response shapes.
+Each command supports `--help`. Full docs at [docs.stophy.dev](https://docs.stophy.dev).
+
+## Skills
+
+Five agent skills included. Works with Claude Code, OpenCode, and any agent that supports skills.
+
+```bash
+npx skills add stophydotdev/cli
+```
+
+| Skill | Description |
+|-------|-------------|
+| `stophy-cli` | Full CLI reference |
+| `stophy-search` | Search YouTube by keyword |
+| `stophy-video` | Transcripts, comments, and metadata |
+| `stophy-channel` | Browse channel catalogs |
+| `stophy-playlist` | Fetch playlist contents |
 
 ## License
 

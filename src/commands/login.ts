@@ -12,8 +12,8 @@ const err = (msg: string) => process.stderr.write(`${msg}\n`);
 type LoginMode = "api-key" | "browser";
 
 async function promptForLoginMode(): Promise<LoginMode> {
-	err(`  📺 stophy-cli v${packageJson.version}`);
-	err("  Search, extract and analyze YouTube from the terminal");
+	err(`  📺 @stophy/cli v${packageJson.version}`);
+	err("  YouTube for AI Agents");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");

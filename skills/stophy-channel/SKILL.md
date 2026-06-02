@@ -41,7 +41,7 @@ stophy channel --url "https://www.youtube.com/@t3dotgg" --continuation-token <to
 |--------|--------|-------------|
 | `--url <url>` | YouTube channel URL or @handle | Required |
 | `--tab <tab>` | video, short, playlist, about | Which tab to fetch (default: video) |
-| `--sortBy <sort>` | latest, popular, oldest | Sort order — only applies with `--tab video` |
+| `--sortBy <sort>` | latest, popular, oldest | Sort order. Only applies with `--tab video`. |
 | `--continuation-token <token>` | string | Paginate from a previous response |
 | `--json` | — | Print raw JSON |
 

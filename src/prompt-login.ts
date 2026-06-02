@@ -86,8 +86,8 @@ async function doApiKeyLogin() {
 }
 
 export async function promptLogin() {
-	err(`  📺 stophy-cli v${packageJson.version}`);
-	err("  Search, extract and analyze YouTube from the terminal");
+	err(`  📺 @stophy/cli v${packageJson.version}`);
+	err("  YouTube for AI Agents");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");

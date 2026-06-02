@@ -3,7 +3,7 @@
   "groupings": [
     {
       "title": "Stophy",
-      "description": "Skills for extracting and analyzing YouTube data with the Stophy CLI.",
+      "description": "YouTube for AI Agents. Search, transcripts, comments, channels, and playlists.",
       "skills": [
         "stophy-cli",
         "stophy-search",

@@ -1,7 +1,7 @@
 {
-  "name": "stophy-cli",
-  "version": "1.0.0",
-  "description": "Search, extract and analyze YouTube from the terminal",
+  "name": "@stophy/cli",
+  "version": "1.0.1",
+  "description": "Stophy CLI is YouTube for AI Agents",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -14,17 +14,20 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/stophydotdev/stophy-cli"
+    "url": "https://github.com/stophydotdev/cli"
   },
   "homepage": "https://stophy.dev",
   "keywords": [
+    "stophy",
     "youtube",
-    "api",
-    "cli",
+    "youtube-api",
+    "youtube-transcript",
+    "youtube-cli",
+    "ai-agents",
+    "llm",
+    "mcp",
     "transcript",
-    "search",
-    "video",
-    "data"
+    "search"
   ],
   "scripts": {
     "build": "bun build ./src/index.ts --outfile ./dist/index.js --target node --minify && chmod +x ./dist/index.js",

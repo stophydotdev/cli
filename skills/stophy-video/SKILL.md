@@ -46,11 +46,11 @@ stophy video replies --continuation-token <repliesToken>
 
 ## Response shapes
 
-**details**: `title`, `description`, `viewCount`, `likeCount`, `publishedAt`, `channel`, `thumbnails`
+`details` returns `title`, `description`, `viewCount`, `likeCount`, `publishedAt`, `channel`, and `thumbnails`.
 
-**transcript**: `segments[]` with `{ text, start, duration }` and a `language` field
+`transcript` returns `segments[]` with `{ text, start, duration }` and a `language` field.
 
-**comments**: `comments[]` with `{ text, author, likeCount, publishedAt, repliesToken }` — pass `repliesToken` to `stophy video replies` to load the thread
+`comments` returns `comments[]` with `{ text, author, likeCount, publishedAt, repliesToken }`. Pass `repliesToken` to `stophy video replies` to load the full thread.
 
 ## Tips
 
