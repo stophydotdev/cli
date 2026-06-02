@@ -11,7 +11,7 @@ allowed-tools:
 
 # @stophy/cli
 
-YouTube for AI Agents. All output is JSON. Pipe it into jq, scripts, or agents.
+YouTube for AI Agents. Search, transcripts, comments, channels, playlists.
 
 ## Install
 
