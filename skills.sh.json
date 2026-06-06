@@ -3,7 +3,7 @@
   "groupings": [
     {
       "title": "Stophy",
-      "description": "YouTube for AI Agents. Search, transcripts, comments, channels, and playlists.",
+      "description": "The API to search, extract, and analyze YouTube at scale",
       "skills": [
         "stophy-cli",
         "stophy-search",
