@@ -1,6 +1,6 @@
 {
   "name": "@stophy/cli",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "The API to search, extract, and analyze YouTube at scale",
   "license": "MIT",
   "bin": {
@@ -31,7 +31,6 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "prepare": "npm run build",
     "start": "node ./dist/index.js",
     "dev": "tsc --watch",
     "check": "biome check ./src",
