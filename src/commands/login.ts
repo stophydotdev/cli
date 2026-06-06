@@ -13,7 +13,7 @@ type LoginMode = "api-key" | "browser";
 
 async function promptForLoginMode(): Promise<LoginMode> {
 	err(`  📺 @stophy/cli v${packageJson.version}`);
-	err("  YouTube for AI Agents");
+	err("  The API to search, extract, and analyze YouTube at scale");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");

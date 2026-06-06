@@ -21,7 +21,7 @@ const program = new Command();
 program
 	.name("stophy")
 	.version(packageJson.version)
-	.description("YouTube for AI Agents")
+	.description("The API to search, extract, and analyze YouTube at scale")
 	.showHelpAfterError()
 	.action(() => {
 		program.outputHelp();

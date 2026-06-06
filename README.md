@@ -1,6 +1,6 @@
 # @stophy/cli
 
-YouTube for AI agents. Search, transcripts, comments, channels, playlists.
+The API to search, extract, and analyze YouTube at scale for AI agents.
 
 ## Install
 

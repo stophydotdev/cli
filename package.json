@@ -1,7 +1,7 @@
 {
   "name": "@stophy/cli",
-  "version": "1.0.2",
-  "description": "Stophy CLI is YouTube for AI Agents",
+  "version": "1.0.3",
+  "description": "The API to search, extract, and analyze YouTube at scale",
   "license": "MIT",
   "type": "module",
   "bin": {

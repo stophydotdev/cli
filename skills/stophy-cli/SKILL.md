@@ -1,6 +1,6 @@
 ---
 name: stophy-cli
-description: YouTube for AI Agents. Use when the user wants YouTube content — transcripts, comments, search results, channels, or playlists — or provides a YouTube URL and needs its content analyzed.
+description: Use when the user wants YouTube content — transcripts, comments, search results, channels, or playlists — or provides a YouTube URL and needs its content analyzed.
 metadata:
   author: stophy
   version: "1.0.0"
@@ -11,7 +11,7 @@ allowed-tools:
 
 # @stophy/cli
 
-YouTube for AI Agents. Search, transcripts, comments, channels, playlists.
+The API to search, extract, and analyze YouTube at scale for AI agents.
 
 ## Install
 
