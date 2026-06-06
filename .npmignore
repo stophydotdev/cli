@@ -1,0 +1,32 @@
+# Source files
+src/
+tsconfig.json
+biome.json
+
+# Development files
+.git/
+.gitignore
+*.swp
+*.swo
+
+# Build artifacts
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Lock files
+package-lock.json
+bun.lock
