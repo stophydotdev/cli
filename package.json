@@ -1,6 +1,6 @@
 {
   "name": "@stophy/cli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The API to search, extract, and analyze YouTube at scale",
   "license": "MIT",
   "bin": {

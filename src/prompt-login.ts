@@ -45,9 +45,9 @@ async function tryOpenBrowser(url: string) {
 
 export async function doBrowserLogin() {
 	const { baseUrl, frontendUrl } = await resolveRuntimeConfig();
-	const pending = await startBrowserLogin();
-	const { port, state } = pending;
-	const loginUrl = getBrowserLoginUrl(baseUrl, frontendUrl, port, state);
+	const pending = await startBrowserLogin(baseUrl);
+	const { sessionId, codeChallenge } = pending;
+	const loginUrl = getBrowserLoginUrl(frontendUrl, sessionId, codeChallenge);
 
 	err("");
 	err(green(loginUrl));
@@ -63,19 +63,11 @@ export async function doBrowserLogin() {
 	const current = await loadConfig();
 	await saveConfig({
 		...current,
-		...(result.apiKey ? { apiKey: result.apiKey } : {}),
-		baseUrl: result.baseUrl ?? baseUrl,
+		apiKey: result.apiKey,
+		baseUrl,
 		frontendUrl,
-		sessionCookie: result.sessionCookie,
-		sessionExpiresAt: result.sessionExpiresAt,
 	});
-	err(
-		green(
-			result.apiKey
-				? "Stophy CLI authorized. Saved browser session and API key."
-				: "Stophy CLI authorized. Saved browser session.",
-		),
-	);
+	err(green("Stophy CLI authorized. Saved API key."));
 }
 
 async function doApiKeyLogin() {

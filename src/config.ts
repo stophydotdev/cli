@@ -126,14 +126,12 @@ export function validateApiKey(apiKey: string) {
 }
 
 export function getBrowserLoginUrl(
-	baseUrl: string,
 	frontendUrl: string,
-	cliPort: number,
-	cliState: string,
+	sessionId: string,
+	codeChallenge: string,
 ) {
-	const url = new URL("/cli/complete", frontendUrl);
-	url.searchParams.set("cliPort", String(cliPort));
-	url.searchParams.set("cliState", cliState);
-	url.searchParams.set("apiBaseUrl", baseUrl);
+	const url = new URL("/cli-auth", frontendUrl);
+	url.searchParams.set("session_id", sessionId);
+	url.searchParams.set("code_challenge", codeChallenge);
 	return url.toString();
 }
