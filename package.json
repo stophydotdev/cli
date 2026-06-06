@@ -30,10 +30,10 @@
     "search"
   ],
   "scripts": {
-    "build": "bun build ./src/index.ts --outfile ./dist/index.js --target node --minify && chmod +x ./dist/index.js",
-    "prepare": "bun run build",
+    "build": "esbuild ./src/index.ts --bundle --outfile=./dist/index.js --platform=node --format=esm --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\" --minify && chmod +x ./dist/index.js",
+    "prepare": "npm run build",
     "start": "node ./dist/index.js",
-    "dev": "bun run src/index.ts",
+    "dev": "tsx src/index.ts",
     "check": "biome check ./src",
     "check-types": "tsc --noEmit"
   },
@@ -49,6 +49,8 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
     "@types/node": "^25.9.1",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.8.0"
   }
 }
