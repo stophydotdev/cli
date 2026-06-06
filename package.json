@@ -3,7 +3,6 @@
   "version": "1.0.3",
   "description": "The API to search, extract, and analyze YouTube at scale",
   "license": "MIT",
-  "type": "module",
   "bin": {
     "stophy": "dist/index.js"
   },
@@ -30,10 +29,11 @@
     "search"
   ],
   "scripts": {
-    "build": "esbuild ./src/index.ts --bundle --outfile=./dist/index.js --platform=node --format=esm --banner:js=\"import{createRequire}from'module';const require=createRequire(import.meta.url);\" --minify && chmod +x ./dist/index.js",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
     "prepare": "npm run build",
     "start": "node ./dist/index.js",
-    "dev": "tsx src/index.ts",
+    "dev": "tsc --watch",
     "check": "biome check ./src",
     "check-types": "tsc --noEmit"
   },
@@ -49,8 +49,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
     "@types/node": "^25.9.1",
-    "esbuild": "^0.25.0",
-    "tsx": "^4.19.0",
     "typescript": "^5.8.0"
   }
 }
