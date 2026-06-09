@@ -11,12 +11,15 @@ export function registerSuggestCommand(program: Command) {
 		.option("--hl <lang>", "Language code (default: en)")
 		.option("--gl <country>", "Country code (default: US)")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy suggest --q "how to"
   $ stophy suggest --q "typescript" --hl en --gl US
   $ stophy suggest --q "recettes" --hl fr --gl FR
-`)
+`,
+		)
 		.action(async (options) => {
 			if (!options.q?.trim()) {
 				throw new CliError("`--q` is required.");

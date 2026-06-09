@@ -1,6 +1,6 @@
 # @stophy/cli
 
-The API to search, extract, and analyze YouTube at scale for AI agents.
+Search YouTube, get transcripts, read comments, inspect channels, and fetch playlists from the terminal.
 
 ## Install
 
@@ -8,7 +8,8 @@ The API to search, extract, and analyze YouTube at scale for AI agents.
 npm install -g @stophy/cli
 ```
 
-Node.js 18 or later. Get an API key from [stophy.dev/dashboard](https://stophy.dev/dashboard).
+
+Requires Node.js 18 or later. Get an API key from [stophy.dev](https://stophy.dev/dashboard).
 
 ## Auth
 
@@ -123,8 +124,8 @@ stophy logs --days 30 --endpoint /v1/video
 | `stophy video transcript` | Timestamped transcript |
 | `stophy video comments` | Paginated comments |
 | `stophy video replies` | Comment replies |
-| `stophy channel` | Channel videos, shorts, playlists, or about |
-| `stophy playlist` | All videos in a playlist |
+| `stophy channel` | Channel videos, Shorts, playlists, or about page |
+| `stophy playlist` | Playlist videos and metadata |
 | `stophy credits` | Remaining credit balance |
 | `stophy usage` | API usage for your key |
 | `stophy logs` | Request logs for your key |
@@ -132,22 +133,6 @@ stophy logs --days 30 --endpoint /v1/video
 | `stophy logout` | Clear saved credentials |
 
 Each command supports `--help`. Full docs at [docs.stophy.dev](https://docs.stophy.dev).
-
-## Skills
-
-Five agent skills included. Works with Claude Code, OpenCode, and any agent that supports skills.
-
-```bash
-npx skills add stophydotdev/cli
-```
-
-| Skill | Description |
-|-------|-------------|
-| `stophy-cli` | Full CLI reference |
-| `stophy-search` | Search YouTube by keyword |
-| `stophy-video` | Transcripts, comments, and metadata |
-| `stophy-channel` | Browse channel catalogs |
-| `stophy-playlist` | Fetch playlist contents |
 
 ## License
 

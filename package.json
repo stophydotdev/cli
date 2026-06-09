@@ -1,15 +1,14 @@
 {
   "name": "@stophy/cli",
-  "version": "1.0.6",
-  "description": "The API to search, extract, and analyze YouTube at scale",
+  "version": "1.0.7",
+  "description": "The CLI to search YouTube, get transcripts, read comments, and inspect channels",
   "license": "MIT",
   "bin": {
     "stophy": "dist/index.js"
   },
   "files": [
     "dist",
-    "README.md",
-    "skills"
+    "README.md"
   ],
   "repository": {
     "type": "git",
@@ -21,6 +20,12 @@
     "youtube",
     "youtube-api",
     "youtube-transcript",
+    "youtube-comments",
+    "youtube-replies",
+    "youtube-channel",
+    "youtube-playlist",
+    "youtube-video",
+    "youtube-search",
     "youtube-cli",
     "ai-agents",
     "llm",

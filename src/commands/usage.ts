@@ -11,12 +11,15 @@ export function registerUsageCommand(program: Command) {
 		.description("Show API usage for your key")
 		.option("--days <days>", "today, 7, or 30", "7")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy usage
   $ stophy usage --days today
   $ stophy usage --days 30 --json
-`)
+`,
+		)
 		.action(async (options) => {
 			if (!VALID_DAYS.has(String(options.days))) {
 				throw new CliError("`--days` must be one of: today, 7, 30.");
