@@ -5,19 +5,25 @@ import { printJson } from "../output";
 export function registerChannelCommand(program: Command) {
 	program
 		.command("channel")
-		.description("Browse a channel's videos, shorts, playlists, or about page")
+		.description("Inspect a channel's videos, Shorts, playlists, or about page")
 		.requiredOption("--url <url>", "YouTube channel URL")
 		.option("--tab <tab>", "video, short, playlist, or about (default: video)")
-		.option("--sortBy <sortBy>", "latest, popular, or oldest (only applies with --tab video)")
+		.option(
+			"--sortBy <sortBy>",
+			"latest, popular, or oldest (only applies with --tab video)",
+		)
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy channel --url "https://www.youtube.com/@t3dotgg"
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab video --sortBy popular
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab playlist
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab about --json
-`)
+`,
+		)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",

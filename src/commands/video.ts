@@ -6,18 +6,21 @@ import { printJson } from "../output";
 export function registerVideoCommands(program: Command) {
 	const video = program
 		.command("video")
-		.description("Get video details, transcript, comments, or replies");
+		.description("Get video details, transcripts, comments, or replies");
 
 	video
 		.command("details")
 		.description("Get metadata for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy video details --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
   $ stophy video details --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.title'
-`)
+`,
+		)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
@@ -29,14 +32,17 @@ Examples:
 
 	video
 		.command("transcript")
-		.description("Get the transcript/captions for a YouTube video")
+		.description("Get the transcript for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy video transcript --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
-  $ stophy video transcript --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.transcript'
-`)
+  $ stophy video transcript --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.segments[].text'
+`,
+		)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
@@ -53,12 +59,15 @@ Examples:
 		.option("--sortBy <sortBy>", "top or latest")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4"
   $ stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --sortBy top
   $ stophy video comments --url "https://www.youtube.com/watch?v=h6ukrWyqOm4" --json | jq '.data.comments[0].text'
-`)
+`,
+		)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",
@@ -78,10 +87,13 @@ Examples:
 		.description("Get replies to a comment using a continuation token")
 		.requiredOption("--continuation-token <token>", "Reply continuation token")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy video replies --continuation-token "<token from comments response>"
-`)
+`,
+		)
 		.action(async (options) => {
 			if (!options.continuationToken?.trim()) {
 				throw new CliError("`--continuation-token` is required.");

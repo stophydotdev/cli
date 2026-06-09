@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { createInterface } from "node:readline";
 import packageJson from "../package.json";
+import { startBrowserLogin } from "./browser-login";
 import { green } from "./color";
 import {
 	getBrowserLoginUrl,
@@ -10,7 +11,6 @@ import {
 	setStoredApiKey,
 	validateApiKey,
 } from "./config";
-import { startBrowserLogin } from "./browser-login";
 
 const err = (msg: string) => process.stderr.write(`${msg}\n`);
 
@@ -79,7 +79,7 @@ async function doApiKeyLogin() {
 
 export async function promptLogin() {
 	err(`  📺 @stophy/cli v${packageJson.version}`);
-	err("  The API to search, extract, and analyze YouTube at scale");
+	err("  Search YouTube, get transcripts, read comments, and inspect channels");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");

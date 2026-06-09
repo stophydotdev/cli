@@ -46,11 +46,15 @@ export function registerAccountCommands(program: Command) {
 			process.stderr.write("│          Stophy Configuration           │\n");
 			process.stderr.write("└─────────────────────────────────────────┘\n");
 			process.stderr.write("\n");
-			process.stderr.write(`Status: ${formatStatus(runtime.apiKey, stored.sessionCookie)}\n`);
+			process.stderr.write(
+				`Status: ${formatStatus(runtime.apiKey, stored.sessionCookie)}\n`,
+			);
 			process.stderr.write("\n");
 
 			if (isAuthed) {
-				process.stderr.write(`API Key:       ${maskSecret(runtime.apiKey)}${formatApiKeySource(runtime.apiKeySource)}\n`);
+				process.stderr.write(
+					`API Key:       ${maskSecret(runtime.apiKey)}${formatApiKeySource(runtime.apiKeySource)}\n`,
+				);
 				process.stderr.write(
 					`Session:       ${hasSessionCookie(stored.sessionCookie) ? green("Saved") : "Not saved"}\n`,
 				);
@@ -62,8 +66,12 @@ export function registerAccountCommands(program: Command) {
 				process.stderr.write("  stophy logout       Clear credentials\n");
 				process.stderr.write("  stophy login        Re-authenticate\n");
 			} else {
-				process.stderr.write("Run any command to start authentication, or use:\n");
-				process.stderr.write("  stophy login        Authenticate with browser or API key\n");
+				process.stderr.write(
+					"Run any command to start authentication, or use:\n",
+				);
+				process.stderr.write(
+					"  stophy login        Authenticate with browser or API key\n",
+				);
 			}
 		});
 

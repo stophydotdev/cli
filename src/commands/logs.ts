@@ -12,13 +12,16 @@ export function registerLogsCommand(program: Command) {
 		.option("--days <days>", "today, 7, or 30", "7")
 		.option("--endpoint <endpoint>", "Filter by endpoint (e.g. /v1/search)")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy logs
   $ stophy logs --days today
   $ stophy logs --days 30 --endpoint /v1/search
   $ stophy logs --json | jq '.data.logs[0]'
-`)
+`,
+		)
 		.action(async (options) => {
 			if (!VALID_DAYS.has(String(options.days))) {
 				throw new CliError("`--days` must be one of: today, 7, 30.");

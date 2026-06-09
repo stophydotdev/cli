@@ -12,16 +12,18 @@ import { registerSearchCommand } from "./commands/search";
 import { registerSuggestCommand } from "./commands/suggest";
 import { registerUsageCommand } from "./commands/usage";
 import { registerVideoCommands } from "./commands/video";
+import { resolveRuntimeConfig } from "./config";
 import { toCliError } from "./errors";
 import { promptLogin } from "./prompt-login";
-import { resolveRuntimeConfig } from "./config";
 
 const program = new Command();
 
 program
 	.name("stophy")
 	.version(packageJson.version)
-	.description("The API to search, extract, and analyze YouTube at scale")
+	.description(
+		"Search YouTube, get transcripts, read comments, and inspect channels",
+	)
 	.showHelpAfterError()
 	.action(() => {
 		program.outputHelp();

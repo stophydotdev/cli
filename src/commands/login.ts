@@ -1,11 +1,8 @@
 import type { Command } from "commander";
 import packageJson from "../../package.json";
 import { green } from "../color";
-import { resolveRuntimeConfig, setStoredApiKey, validateApiKey } from "../config";
-import {
-	doBrowserLogin,
-	prompt,
-} from "../prompt-login";
+import { setStoredApiKey, validateApiKey } from "../config";
+import { doBrowserLogin, prompt } from "../prompt-login";
 
 const err = (msg: string) => process.stderr.write(`${msg}\n`);
 
@@ -13,7 +10,7 @@ type LoginMode = "api-key" | "browser";
 
 async function promptForLoginMode(): Promise<LoginMode> {
 	err(`  📺 @stophy/cli v${packageJson.version}`);
-	err("  The API to search, extract, and analyze YouTube at scale");
+	err("  Search YouTube, get transcripts, read comments, and inspect channels");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");

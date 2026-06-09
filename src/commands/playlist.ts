@@ -5,15 +5,18 @@ import { printJson } from "../output";
 export function registerPlaylistCommand(program: Command) {
 	program
 		.command("playlist")
-		.description("Get all videos in a playlist with full metadata")
+		.description("Get playlist videos and metadata")
 		.requiredOption("--url <url>", "YouTube playlist URL")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy playlist --url "https://youtube.com/playlist?list=PLxxxxxx"
-  $ stophy playlist --url "https://youtube.com/playlist?list=PLxxxxxx" --json | jq '.data.videos[].title'
-`)
+  $ stophy playlist --url "https://youtube.com/playlist?list=PLxxxxxx" --json | jq '.data.items[].title'
+`,
+		)
 		.action(async (options) => {
 			const result = await request<Record<string, unknown>>({
 				method: "POST",

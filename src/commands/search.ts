@@ -14,13 +14,16 @@ export function registerSearchCommand(program: Command) {
 		.option("--duration <duration>", "short, medium, or long")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
-		.addHelpText("after", `
+		.addHelpText(
+			"after",
+			`
 Examples:
   $ stophy search --q "machine learning"
   $ stophy search --q "cooking" --type video --sortBy viewCount
   $ stophy search --q "news" --uploadDate today --duration short
   $ stophy search --q "nodejs" --json | jq '.data.results[0]'
-`)
+`,
+		)
 		.action(async (options) => {
 			if (!options.q?.trim()) {
 				throw new CliError("`--q` is required.");

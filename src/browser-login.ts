@@ -24,7 +24,10 @@ export async function startBrowserLogin(
 	const initRes = await fetch(new URL("/api/cli/init", `${baseUrl}/`), {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ session_id: sessionId, code_challenge: codeChallenge }),
+		body: JSON.stringify({
+			session_id: sessionId,
+			code_challenge: codeChallenge,
+		}),
 	}).catch((err: Error) => {
 		throw new CliError(`Could not reach Stophy API: ${err.message}`);
 	});
