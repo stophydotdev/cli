@@ -79,6 +79,24 @@ stophy video comments --url "https://youtube.com/watch?v=QRvfjPltvmE" --sortBy t
 }
 ```
 
+### video livechat
+
+```bash
+stophy video livechat --url "https://youtube.com/watch?v=..." --chat-type top
+```
+
+```json
+{
+  "status": "live",
+  "concurrentViewers": 1234,
+  "pollIntervalMs": 10000,
+  "messages": [
+    { "text": "first!", "author": "@viewer1", "isModerator": false, "superChatAmount": null }
+  ],
+  "continuationToken": "..."
+}
+```
+
 ### channel
 
 ```bash
@@ -124,6 +142,7 @@ stophy logs --days 30 --endpoint /v1/video
 | `stophy video transcript` | Timestamped transcript |
 | `stophy video comments` | Paginated comments |
 | `stophy video replies` | Comment replies |
+| `stophy video livechat` | Livestream chat messages and status |
 | `stophy channel` | Channel videos, Shorts, playlists, or about page |
 | `stophy playlist` | Playlist videos and metadata |
 | `stophy credits` | Remaining credit balance |
