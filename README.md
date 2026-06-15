@@ -1,6 +1,6 @@
 # @stophy/cli
 
-Search YouTube, get transcripts, read comments, inspect channels, and fetch playlists from the terminal.
+YouTube data for AI agents and developers. Search, transcripts, comments, channels, playlists — from the terminal.
 
 ## Install
 
@@ -8,8 +8,7 @@ Search YouTube, get transcripts, read comments, inspect channels, and fetch play
 npm install -g @stophy/cli
 ```
 
-
-Requires Node.js 18 or later. Get an API key from [stophy.dev](https://stophy.dev/dashboard).
+Requires Node.js 18 or later. Get an API key at [stophy.dev](https://stophy.dev/dashboard).
 
 ## Auth
 
@@ -133,7 +132,7 @@ stophy logs --days 30 --endpoint /v1/video
 
 ## All commands
 
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
 | `stophy login` | Authenticate with API key or browser |
 | `stophy search` | Search YouTube by keyword |
@@ -152,6 +151,11 @@ stophy logs --days 30 --endpoint /v1/video
 | `stophy logout` | Clear saved credentials |
 
 Each command supports `--help`. Full docs at [docs.stophy.dev](https://docs.stophy.dev).
+
+## Also see
+
+- [@stophy/mcp](https://www.npmjs.com/package/@stophy/mcp) — MCP server for AI agents
+- [stophy.dev](https://stophy.dev) — dashboard and API keys
 
 ## License
 

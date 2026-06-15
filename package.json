@@ -1,7 +1,7 @@
 {
   "name": "@stophy/cli",
-  "version": "1.0.7",
-  "description": "The CLI to search YouTube, get transcripts, read comments, and inspect channels",
+  "version": "1.0.8",
+  "description": "YouTube data for AI agents and developers. Search YouTube, get transcripts, read comments, and inspect channels — from the terminal.",
   "license": "MIT",
   "bin": {
     "stophy": "dist/index.js"
@@ -10,24 +10,21 @@
     "dist",
     "README.md"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/stophydotdev/cli"
-  },
   "homepage": "https://stophy.dev",
   "keywords": [
     "stophy",
     "youtube",
+    "youtube-data",
     "youtube-api",
     "youtube-transcript",
     "youtube-comments",
-    "youtube-replies",
     "youtube-channel",
     "youtube-playlist",
-    "youtube-video",
     "youtube-search",
     "youtube-cli",
+    "ai-agent",
     "ai-agents",
+    "youtube-for-ai",
     "llm",
     "mcp",
     "transcript",
@@ -43,9 +40,6 @@
   },
   "dependencies": {
     "commander": "^14.0.2"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "engines": {
     "node": ">=18"
