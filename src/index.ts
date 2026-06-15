@@ -22,7 +22,7 @@ program
 	.name("stophy")
 	.version(packageJson.version)
 	.description(
-		"Search YouTube, get transcripts, read comments, and inspect channels",
+		"YouTube data for AI agents and developers. Search, transcripts, comments, channels, playlists — from the terminal.",
 	)
 	.showHelpAfterError()
 	.action(() => {
