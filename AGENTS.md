@@ -29,9 +29,13 @@ scripts/
 homebrew/
   stophy.rb            # Homebrew formula
 .github/workflows/
-  publish.yml          # npm publish on release
+  publish.yml          # tokenless npm publish via trusted publishing
+  version.yml          # Changesets version PR on main
   release-binaries.yml # build + attach binaries on tag
   test.yml             # build + biome check on PR
+.changeset/
+  config.json          # Changesets release config
+  README.md            # local release workflow notes
 nfpm.yaml              # deb/rpm/apk/archlinux packaging
 biome.json             # lint + format config (tabs, double quotes)
 tsconfig.json          # ESM (NodeNext), ES2022, outputs to dist/
@@ -45,10 +49,12 @@ CLAUDE.md              # @AGENTS.md (cross-agent include)
 - **ESM import rules.** Relative imports **must** carry the `.js` extension (e.g. `import { request } from "./client.js"`) — that's the compiled path, even though the source is `.ts`. JSON imports need an import attribute: `import packageJson from "../package.json" with { type: "json" }`. Prefer named exports; default-import the libraries that ship that way (`chalk`, `ora`, `open`, `Conf`, `updateNotifier`).
 - **Dependencies.** Runtime deps are deliberate and few: `commander` (CLI), `chalk` (color), `ora` (spinner), `open` (browser launch), `prompts` (interactive login), `conf` (config storage), `update-notifier` (update check). Don't reach for a new dependency when one of these or a Node built-in (`fetch`, `node:fs`, `node:crypto`) covers it; every dep also has to bundle cleanly into the `bun --compile` binary.
 - **Lint & format.** Biome, with tabs and double quotes. Run `bun run check` (or `bunx biome check ./src`) after every change; use `bunx biome check --write ./src` to apply fixes. Do not add Prettier, ESLint, or husky.
+- **Branches & commits.** Work on a new branch for each change; do not make normal feature, fix, or release-infra commits directly on `main`. Use Conventional Commit style: `<type>(<scope>): <summary>` (for example, `feat(ci): change release workflow`). Keep the summary imperative, lowercase, and concise.
 - **Imports.** Use `import type { ... }` for type-only imports. Keep imports sorted (Biome enforces this on `--write`).
 - **Errors.** Commands throw `CliError` (from `src/errors.ts`) for anything user-facing — never `process.exit` inside a command body. `index.ts` catches, prints `error.message`, and exits with `error.exitCode`. Wrap unknown errors with `toCliError`.
 - **HTTP.** Every API call goes through `request<T>()` in `src/client.ts`. Do not call `fetch` directly from a command (the one exception is `doctor`'s `pingCredits`, which deliberately bypasses the envelope check to report raw HTTP status). The API envelope is `ApiSuccess<T>` / `ApiFailure` in `src/types/api.ts` — `{ success, data, requestId?, cacheState?, creditsUsed?, creditsRemaining? }`. Read payload from `result.body.data`.
 - **Output.** Data commands print pretty JSON to stdout by default. Route through `handleOutput(value, options)` / `writeOutput(content, output)` from `src/output.ts` so the shared `--json` and `-o, --output <file>` flags work. File writes go to disk; a confirmation goes to **stderr** so piped stdout stays clean.
+- **Releases.** User-facing changes require a changeset (`bun run changeset`). Changesets opens the version PR from `main`; merging that PR updates `package.json` / `CHANGELOG.md` and triggers publish/release workflows. Do not manually bump `package.json` for normal releases.
 - **Color.** Color is TTY/`NO_COLOR`/`FORCE_COLOR`-gated. The brand accent is Stophy green `#006239`, written as the truecolor sequence `\x1b[38;2;0;98;57m`. Status dots are semantic (green = ok, yellow = warn, red = fail). Never hardcode the brand color as red or any other hue.
 - **Secrets.** API keys are `st_xxx` tokens. Never log, print in full, or commit them. Mask as `st_...<last4>` (see `doctor.ts`). Config lives under `~/.config/stophy/`.
 
@@ -60,18 +66,22 @@ CLAUDE.md              # @AGENTS.md (cross-agent include)
 4. Register it in `src/index.ts` (add the import and the `register…(program)` call, keeping the grouping consistent with the existing list).
 5. If the command must work **without** credentials, add its name to `NO_AUTH_COMMANDS` in `src/index.ts`. Otherwise the `preAction` hook prompts for login.
 6. Add a row to the command table and (if user-facing) an example section in `README.md`.
-7. Run `bun run build && bun run check`.
+7. Add a changeset with `bun run changeset` unless the command is purely internal or unreleased scaffolding.
+8. Run `bun run build && bun run check`.
 
 ## Editing a command
 
 Edit `src/commands/<name>.ts` and its `src/types/<name>.ts` together — keep the Options interface in sync with the registered flags, and the Data types in sync with the live API. If you change a flag name or output shape, update the `addHelpText` examples and the matching `README.md` section in the same change. Rebuild and lint.
+
+If the edit changes user-visible behavior, flags, output, auth, install behavior, or packaging, add a changeset with `bun run changeset`.
 
 ## Removing a command
 
 1. Delete `src/commands/<name>.ts` and `src/types/<name>.ts` (unless the type file is shared).
 2. Remove the import and `register…` call from `src/index.ts`, and drop it from `NO_AUTH_COMMANDS` if present.
 3. Remove its row and example from `README.md`.
-4. Rebuild and lint to confirm nothing else imported it.
+4. Add a changeset because removing a command is user-facing.
+5. Rebuild and lint to confirm nothing else imported it.
 
 ## The request path (`src/client.ts`)
 
@@ -93,16 +103,28 @@ Edit `src/commands/<name>.ts` and its `src/types/<name>.ts` together — keep th
 - `update-notice.ts` — `maybeShowUpdateNotice()`, called at the end of `main()`. Backed by `update-notifier` (it owns the background check, caching, and throttling). stderr/TTY-only, disabled by `STOPHY_NO_UPDATE_CHECK=1`.
 - `version` / `status` / `doctor` commands — diagnostics; all three are in `NO_AUTH_COMMANDS`.
 
+## Changesets
+
+Changesets owns release intent and version bumps.
+
+- Add a changeset with `bun run changeset` for any user-facing CLI, README, install, auth, output, packaging, or dependency behavior change.
+- Do not add a changeset for CI-only maintenance, comments, tests that do not change behavior, or internal refactors with no user-visible effect.
+- The generated `.changeset/*.md` file must be committed with the feature change.
+- On `main`, `.github/workflows/version.yml` creates or updates the `Version Packages` PR.
+- Merging the version PR applies `changeset version`, updates `package.json`, creates/updates `CHANGELOG.md`, and removes consumed changeset files.
+- Do not hand-edit `CHANGELOG.md` for normal releases; edit the changeset text before the version PR is generated.
+
 ## Distribution
 
 - `bun run build:binary` (`scripts/build-binaries.sh`) cross-compiles standalone binaries via `bun build --compile`, named `stophy-<os>-<arch>`.
 - `scripts/install.sh` / `install.ps1` are the `curl|bash` / `irm|iex` installers; they fetch release binaries from the GitHub releases of `stophydotdev/cli`.
 - `homebrew/stophy.rb` and `nfpm.yaml` cover Homebrew and Linux package managers.
-- GitHub Actions: `test.yml` (PR build + lint), `publish.yml` (npm on release), `release-binaries.yml` (binaries on tag).
+- GitHub Actions: `test.yml` (PR build + lint), `version.yml` (Changesets version PR), `publish.yml` (npm trusted publishing, no npm token), `release-binaries.yml` (binaries and Linux packages on version tag).
+- npm trusted publishing must point at `.github/workflows/publish.yml`. Do not reintroduce `NPM_TOKEN` / `NODE_AUTH_TOKEN` for the normal publish path.
 
 ## package.json
 
-`files` ships only `dist` and `README.md`. `bin.stophy` → `dist/index.js`. `prepublishOnly` runs the build. Bump `version` for any user-visible change; keep the `description` aligned with the README tagline.
+`files` ships only `dist` and `README.md`. `bin.stophy` → `dist/index.js`. `prepublishOnly` runs the build. `version` is updated by Changesets, not by hand for normal releases. Keep the `description` aligned with the README tagline.
 
 ## Related
 
