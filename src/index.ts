@@ -6,6 +6,7 @@ import { registerAccountCommands } from "./commands/account.js";
 import { registerChannelCommand } from "./commands/channel.js";
 import { registerCreditsCommand } from "./commands/credits.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
+import { registerInitCommand } from "./commands/init.js";
 import { registerLoginCommand } from "./commands/login.js";
 import { registerLogsCommand } from "./commands/logs.js";
 import { registerPlaylistCommand } from "./commands/playlist.js";
@@ -33,6 +34,7 @@ program
 		program.outputHelp();
 	});
 
+registerInitCommand(program);
 registerLoginCommand(program);
 registerAccountCommands(program);
 registerVersionCommand(program);
@@ -49,6 +51,7 @@ registerLogsCommand(program);
 
 const NO_AUTH_COMMANDS = new Set([
 	"login",
+	"init",
 	"logout",
 	"view-config",
 	"version",
