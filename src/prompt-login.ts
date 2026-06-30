@@ -32,7 +32,7 @@ async function tryOpenBrowser(url: string): Promise<boolean> {
 	}
 }
 
-export async function doBrowserLogin() {
+export async function doBrowserLogin(options?: { promptBeforeOpen?: boolean }) {
 	const { baseUrl, frontendUrl } = await resolveRuntimeConfig();
 	const pending = await startBrowserLogin(baseUrl);
 	const { sessionId, codeChallenge } = pending;
@@ -41,7 +41,9 @@ export async function doBrowserLogin() {
 	err("");
 	err(green(loginUrl));
 	err("");
-	await prompt("Press Enter to open your browser...");
+	if (options?.promptBeforeOpen !== false) {
+		await prompt("Press Enter to open your browser...");
+	}
 	const opened = await tryOpenBrowser(loginUrl);
 	if (!opened) {
 		err("Could not open browser automatically. Please visit the URL above.");

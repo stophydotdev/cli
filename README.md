@@ -2,6 +2,14 @@
 
 YouTube context for AI agents. Search, transcripts, comments, channels, playlists — structured JSON from the terminal.
 
+## Quick start
+
+Install the CLI globally, add every Stophy skill to all supported AI agents, and authenticate in your browser:
+
+```bash
+npx -y @stophy/cli@latest init --all --browser
+```
+
 ## Install
 
 ```bash
@@ -154,6 +162,7 @@ stophy logs --days 30 --endpoint /v1/video
 
 | Command | What it does |
 |---------|-------------|
+| `stophy init --all --browser` | Install the CLI, all agent skills, and authenticate |
 | `stophy login` | Authenticate with API key or browser |
 | `stophy search` | Search YouTube by keyword |
 | `stophy suggest` | Search autocomplete suggestions |

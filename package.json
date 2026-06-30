@@ -45,6 +45,7 @@
     "dev": "tsc --watch",
     "check": "biome check ./src",
     "check-types": "tsc --noEmit",
+    "test:init": "npm run build && node --test tests/init.test.mjs",
     "changeset": "changeset",
     "version": "changeset version",
     "build:binary": "bash scripts/build-binaries.sh",
