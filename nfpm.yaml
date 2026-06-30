@@ -1,0 +1,14 @@
+name: stophy
+description: Stophy CLI - YouTube data for AI agents and developers
+homepage: https://stophy.dev
+maintainer: Stophy <support@stophy.dev>
+license: MIT
+vendor: Stophy
+version: ${VERSION}
+arch: ${ARCH}
+
+contents:
+  - src: ${BINARY}
+    dst: /usr/bin/stophy
+    file_info:
+      mode: 0755

@@ -1,8 +1,9 @@
 {
   "name": "@stophy/cli",
   "version": "1.0.8",
-  "description": "YouTube data for AI agents and developers. Search YouTube, get transcripts, read comments, and inspect channels — from the terminal.",
+  "description": "YouTube context for AI agents. Search, transcripts, comments, channels, and playlists — structured JSON from the terminal.",
   "license": "MIT",
+  "type": "module",
   "bin": {
     "stophy": "dist/index.js"
   },
@@ -11,6 +12,13 @@
     "README.md"
   ],
   "homepage": "https://stophy.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stophydotdev/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stophydotdev/cli/issues"
+  },
   "keywords": [
     "stophy",
     "youtube",
@@ -36,17 +44,29 @@
     "start": "node ./dist/index.js",
     "dev": "tsc --watch",
     "check": "biome check ./src",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "build:binary": "bash scripts/build-binaries.sh",
+    "build:binary:darwin": "bash scripts/build-binaries.sh darwin",
+    "build:binary:linux": "bash scripts/build-binaries.sh linux",
+    "build:binary:windows": "bash scripts/build-binaries.sh windows"
   },
   "dependencies": {
-    "commander": "^14.0.2"
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "conf": "^15.1.0",
+    "open": "^11.0.0",
+    "ora": "^9.4.1",
+    "prompts": "^2.4.2",
+    "update-notifier": "^7.3.1"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.16",
     "@types/node": "^25.9.1",
+    "@types/prompts": "^2.4.9",
+    "@types/update-notifier": "^6.0.8",
     "typescript": "^5.8.0"
   }
 }

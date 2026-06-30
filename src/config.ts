@@ -1,7 +1,6 @@
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { dirname, join } from "node:path";
-import { CliError } from "./errors";
+import { chmodSync } from "node:fs";
+import Conf from "conf";
+import { CliError } from "./errors.js";
 
 export interface CliConfig {
 	apiKey?: string;
@@ -13,41 +12,48 @@ export interface CliConfig {
 
 export const DEFAULT_BASE_URL = "https://api.stophy.dev";
 export const DEFAULT_FRONTEND_URL = "https://stophy.dev";
-const CONFIG_DIR =
-	process.platform === "win32"
-		? join(process.env.APPDATA ?? homedir(), "stophy")
-		: join(homedir(), ".config", "stophy");
-const CONFIG_PATH = join(CONFIG_DIR, "config.json");
+
+const store = new Conf<CliConfig>({
+	projectName: "stophy",
+	projectSuffix: "",
+	configName: "config",
+});
 
 export function getConfigPath() {
-	return CONFIG_PATH;
+	return store.path;
+}
+
+function secureConfigFile() {
+	try {
+		chmodSync(store.path, 0o600);
+	} catch {
+		// ignore
+	}
 }
 
 export async function loadConfig(): Promise<CliConfig> {
 	try {
-		const raw = await readFile(CONFIG_PATH, "utf8");
-		const parsed = JSON.parse(raw) as CliConfig;
 		return {
-			apiKey: normalizeApiKey(parsed.apiKey),
-			baseUrl: normalizeBaseUrl(parsed.baseUrl),
-			frontendUrl: normalizeBaseUrl(parsed.frontendUrl),
-			sessionCookie: normalizeSessionCookie(parsed.sessionCookie),
-			sessionExpiresAt: normalizeSessionExpiry(parsed.sessionExpiresAt),
+			apiKey: normalizeApiKey(store.get("apiKey")),
+			baseUrl: normalizeBaseUrl(store.get("baseUrl")),
+			frontendUrl: normalizeBaseUrl(store.get("frontendUrl")),
+			sessionCookie: normalizeSessionCookie(store.get("sessionCookie")),
+			sessionExpiresAt: normalizeSessionExpiry(store.get("sessionExpiresAt")),
 		};
-	} catch (error) {
-		if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-			return {};
-		}
-		throw new CliError(`Failed to read config at ${CONFIG_PATH}.`);
+	} catch {
+		throw new CliError(`Failed to read config at ${store.path}.`);
 	}
 }
 
 export async function saveConfig(config: CliConfig) {
-	await mkdir(dirname(CONFIG_PATH), { recursive: true });
-	const tmp = `${CONFIG_PATH}.tmp`;
-	await writeFile(tmp, `${JSON.stringify(config, null, 2)}\n`, "utf8");
-	await chmod(tmp, 0o600);
-	await rename(tmp, CONFIG_PATH);
+	store.store = {
+		apiKey: config.apiKey,
+		baseUrl: config.baseUrl,
+		frontendUrl: config.frontendUrl,
+		sessionCookie: config.sessionCookie,
+		sessionExpiresAt: config.sessionExpiresAt,
+	};
+	secureConfigFile();
 }
 
 export async function setStoredApiKey(apiKey: string) {

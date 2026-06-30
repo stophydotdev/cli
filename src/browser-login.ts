@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { CliError } from "./errors";
+import { CliError } from "./errors.js";
 
 export interface BrowserLoginResult {
 	apiKey: string;
@@ -94,7 +94,7 @@ export async function startBrowserLogin(
 					return;
 				}
 			} catch {
-				// Network hiccup — retry on next tick
+				// retry on next tick
 			}
 
 			setTimeout(poll, 2000);

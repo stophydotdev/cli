@@ -1,4 +1,8 @@
-import type { RequestResult } from "./client";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
+import type { RequestResult } from "./client.js";
+import type { LogsData, UsageData } from "./types/account.js";
+import type { OutputOptions } from "./types/api.js";
 
 type Jsonish =
 	| null
@@ -26,16 +30,41 @@ function formatTimestamp(value: unknown) {
 	return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
 }
 
+export function writeOutput(content: string, output?: string, silent = false) {
+	if (output) {
+		const dir = dirname(output);
+		if (dir) {
+			mkdirSync(dir, { recursive: true });
+		}
+		writeFileSync(
+			output,
+			content.endsWith("\n") ? content : `${content}\n`,
+			"utf8",
+		);
+		if (!silent) {
+			console.error(`Output written to: ${output}`);
+		}
+		return;
+	}
+
+	process.stdout.write(content.endsWith("\n") ? content : `${content}\n`);
+}
+
 export function printJson(value: unknown) {
 	console.log(JSON.stringify(value as Jsonish, null, 2));
 }
 
+export function handleOutput(value: unknown, options: OutputOptions = {}) {
+	const content = JSON.stringify(value as Jsonish, null, 2);
+	writeOutput(content, options.output, Boolean(options.output));
+}
+
 export function printUsage(
-	result: RequestResult<{ items: Record<string, unknown>[] }>,
-	json = false,
+	result: RequestResult<UsageData>,
+	options: OutputOptions = {},
 ) {
-	if (json) {
-		printJson(result.body);
+	if (options.json || options.output) {
+		handleOutput(result.body, options);
 		return;
 	}
 
@@ -49,14 +78,11 @@ export function printUsage(
 }
 
 export function printLogs(
-	result: RequestResult<{
-		endpoints: string[];
-		logs: Record<string, unknown>[];
-	}>,
-	json = false,
+	result: RequestResult<LogsData>,
+	options: OutputOptions = {},
 ) {
-	if (json) {
-		printJson(result.body);
+	if (options.json || options.output) {
+		handleOutput(result.body, options);
 		return;
 	}
 

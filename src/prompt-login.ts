@@ -1,8 +1,8 @@
-import { spawn } from "node:child_process";
-import { createInterface } from "node:readline";
-import packageJson from "../package.json";
-import { startBrowserLogin } from "./browser-login";
-import { green } from "./color";
+import open from "open";
+import prompts from "prompts";
+import packageJson from "../package.json" with { type: "json" };
+import { startBrowserLogin } from "./browser-login.js";
+import { green } from "./color.js";
 import {
 	getBrowserLoginUrl,
 	loadConfig,
@@ -10,37 +10,26 @@ import {
 	saveConfig,
 	setStoredApiKey,
 	validateApiKey,
-} from "./config";
+} from "./config.js";
 
 const err = (msg: string) => process.stderr.write(`${msg}\n`);
 
-export function prompt(question: string): Promise<string> {
-	const rl = createInterface({ input: process.stdin, output: process.stdout });
-	return new Promise((resolve) => {
-		rl.question(question, (answer) => {
-			rl.close();
-			resolve(answer.trim());
-		});
+export async function prompt(question: string): Promise<string> {
+	const { value } = await prompts({
+		type: "text",
+		name: "value",
+		message: question,
 	});
+	return typeof value === "string" ? value.trim() : "";
 }
 
-function getBrowserCommand(url: string) {
-	if (process.platform === "darwin") return ["open", url];
-	if (process.platform === "win32") return ["cmd", "/c", "start", "", url];
-	return ["xdg-open", url];
-}
-
-async function tryOpenBrowser(url: string) {
-	const command = getBrowserCommand(url);
-	return await new Promise<boolean>((resolve) => {
-		const child = spawn(command[0] ?? "xdg-open", command.slice(1), {
-			stdio: "ignore",
-			detached: true,
-		});
-		child.on("error", () => resolve(false));
-		child.unref();
-		resolve(true);
-	});
+async function tryOpenBrowser(url: string): Promise<boolean> {
+	try {
+		await open(url);
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 export async function doBrowserLogin() {
@@ -83,23 +72,23 @@ export async function promptLogin() {
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");
-	err("  1. Login with browser (recommended)");
-	err("  2. Enter API key manually");
-	err("");
-	err("Tip: You can also set STOPHY_API_KEY environment variable");
+	err("Tip: You can also set the STOPHY_API_KEY environment variable.");
 	err("");
 
-	let mode: "browser" | "api-key" | null = null;
-	while (!mode) {
-		const choice = await prompt("Enter choice [1/2]: ");
-		if (choice === "1") mode = "browser";
-		else if (choice === "2") mode = "api-key";
-		else err(green("Enter 1 or 2."));
-	}
+	const { mode } = await prompts({
+		type: "select",
+		name: "mode",
+		message: "How do you want to authenticate?",
+		choices: [
+			{ title: "Login with browser (recommended)", value: "browser" },
+			{ title: "Enter API key manually", value: "api-key" },
+		],
+		initial: 0,
+	});
 
 	if (mode === "browser") {
 		await doBrowserLogin();
-	} else {
+	} else if (mode === "api-key") {
 		await doApiKeyLogin();
 	}
 

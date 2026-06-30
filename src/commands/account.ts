@@ -1,11 +1,11 @@
 import type { Command } from "commander";
-import { green } from "../color";
+import { green } from "../color.js";
 import {
 	clearStoredAuth,
 	getConfigPath,
 	loadConfig,
 	resolveRuntimeConfig,
-} from "../config";
+} from "../config.js";
 
 function maskSecret(value?: string) {
 	if (!value) {
