@@ -187,5 +187,5 @@ jobs:
           git push origin "$VERSION"
           gh release create "$VERSION" release/* \
             --repo "${{ github.repository }}" \
-            --title "Stophy CLI $VERSION" \
+            --title "$VERSION" \
             --notes-file /tmp/release-notes.md
