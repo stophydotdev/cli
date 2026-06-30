@@ -153,7 +153,7 @@ ensure_path() {
 }
 
 main() {
-  local os arch version install_dir
+  local os arch version install_dir current_path
 
   os="$(detect_os)"
   arch="$(detect_arch)"
@@ -175,7 +175,23 @@ main() {
     info "Latest version: v$version"
   fi
 
-  install_dir="${STOPHY_INSTALL_DIR:-$HOME/.local/bin}"
+  if [ -n "${STOPHY_INSTALL_DIR:-}" ]; then
+    install_dir="$STOPHY_INSTALL_DIR"
+  else
+    current_path="$(command -v "$BINARY_NAME" 2>/dev/null || true)"
+    if [ -n "$current_path" ] && [ -w "$(dirname "$current_path")" ]; then
+      install_dir="$(dirname "$current_path")"
+      info "Updating existing installation: $current_path"
+      if [ -L "$current_path" ]; then
+        warn "Replacing the package-managed launcher with the standalone Stophy binary."
+      fi
+    else
+      install_dir="$HOME/.local/bin"
+      if [ -n "$current_path" ]; then
+        warn "Existing installation at $current_path is not writable; installing to $install_dir instead."
+      fi
+    fi
+  fi
   mkdir -p "$install_dir"
 
   local binary_name="${BINARY_NAME}-${os}-${arch}"

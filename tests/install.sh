@@ -63,17 +63,18 @@ BINARY
 chmod +x "$destination/stophy-linux-x64"
 EOF
 
-cat > "$OLD_BIN_DIR/stophy" <<'EOF'
+cat > "$OLD_BIN_DIR/stophy-managed" <<'EOF'
 #!/usr/bin/env bash
 echo "1.0.8"
 EOF
+ln -s "$OLD_BIN_DIR/stophy-managed" "$OLD_BIN_DIR/stophy"
 
 chmod +x \
   "$TOOLS_DIR/uname" \
   "$TOOLS_DIR/curl" \
   "$TOOLS_DIR/tar" \
   "$TOOLS_DIR/shasum" \
-  "$OLD_BIN_DIR/stophy"
+  "$OLD_BIN_DIR/stophy-managed"
 
 PATH="$TOOLS_DIR:$OLD_BIN_DIR:/usr/bin:/bin:$HOME_DIR/.local/bin" \
   HOME="$HOME_DIR" \
@@ -87,16 +88,11 @@ PATH="$TOOLS_DIR:$OLD_BIN_DIR:/usr/bin:/bin:$HOME_DIR/.local/bin" \
   STOPHY_VERSION="1.0.9" \
   bash "$ROOT_DIR/scripts/install.sh" > /dev/null
 
-test "$("$HOME_DIR/.local/bin/stophy" --version)" = "1.0.9"
-grep -Fq "existing Stophy CLI at $OLD_BIN_DIR/stophy is shadowing" "$TEST_DIR/output.txt"
-grep -Fqx "export PATH=\"$HOME_DIR/.local/bin:\$PATH\"" "$HOME_DIR/.bashrc"
-test "$(grep -Fc "export PATH=\"$HOME_DIR/.local/bin:\$PATH\"" "$HOME_DIR/.bashrc")" = "1"
-
-resolved_version="$({
-  PATH="$TOOLS_DIR:$OLD_BIN_DIR:/usr/bin:/bin:$HOME_DIR/.local/bin" \
-    HOME="$HOME_DIR" \
-    bash --noprofile --norc -c 'source "$HOME/.bashrc"; stophy --version'
-})"
-test "$resolved_version" = "1.0.9"
+test "$("$OLD_BIN_DIR/stophy" --version)" = "1.0.9"
+test ! -L "$OLD_BIN_DIR/stophy"
+test ! -e "$HOME_DIR/.local/bin/stophy"
+test ! -e "$HOME_DIR/.bashrc"
+grep -Fq "Updating existing installation: $OLD_BIN_DIR/stophy" "$TEST_DIR/output.txt"
+grep -Fq "Replacing the package-managed launcher" "$TEST_DIR/output.txt"
 
 echo "install.sh upgrade test passed"
