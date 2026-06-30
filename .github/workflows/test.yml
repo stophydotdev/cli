@@ -28,6 +28,9 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Test init onboarding
+        run: node --test tests/init.test.mjs
+
   test-binary:
     if: github.event_name == 'pull_request'
     strategy:
