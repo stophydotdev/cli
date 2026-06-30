@@ -1,0 +1,74 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint and format check
+        run: bun run check
+
+      - name: Type check
+        run: bun run check-types
+
+      - name: Build
+        run: bun run build
+
+  test-binary:
+    if: github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: bun-linux-x64
+            binary: stophy-linux-x64
+          - os: macos-latest
+            target: bun-darwin-arm64
+            binary: stophy-darwin-arm64
+          - os: windows-latest
+            target: bun-windows-x64
+            binary: stophy-windows-x64.exe
+
+    runs-on: ${{ matrix.os }}
+    name: Binary smoke test (${{ matrix.os }})
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Compile binary
+        run: bun build src/index.ts --compile --target=${{ matrix.target }} --outfile ${{ matrix.binary }}
+
+      - name: Verify binary runs (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ${{ matrix.binary }}
+          ./${{ matrix.binary }} --version
+          ./${{ matrix.binary }} --help
+
+      - name: Verify binary runs (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          .\${{ matrix.binary }} --version
+          .\${{ matrix.binary }} --help

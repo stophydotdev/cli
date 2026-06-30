@@ -1,8 +1,8 @@
 import type { Command } from "commander";
-import packageJson from "../../package.json";
-import { green } from "../color";
-import { setStoredApiKey, validateApiKey } from "../config";
-import { doBrowserLogin, prompt } from "../prompt-login";
+import packageJson from "../../package.json" with { type: "json" };
+import { green } from "../color.js";
+import { setStoredApiKey, validateApiKey } from "../config.js";
+import { doBrowserLogin, prompt } from "../prompt-login.js";
 
 const err = (msg: string) => process.stderr.write(`${msg}\n`);
 
@@ -10,7 +10,7 @@ type LoginMode = "api-key" | "browser";
 
 async function promptForLoginMode(): Promise<LoginMode> {
 	err(`  📺 @stophy/cli v${packageJson.version}`);
-	err("  YouTube data for AI agents and developers");
+	err("  YouTube context for AI agents");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");

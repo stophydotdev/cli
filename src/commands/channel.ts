@@ -1,6 +1,8 @@
 import type { Command } from "commander";
-import { request } from "../client";
-import { printJson } from "../output";
+import { request } from "../client.js";
+import { handleOutput } from "../output.js";
+import { withSpinner } from "../spinner.js";
+import type { ChannelData, ChannelOptions } from "../types/channel.js";
 
 export function registerChannelCommand(program: Command) {
 	program
@@ -14,6 +16,7 @@ export function registerChannelCommand(program: Command) {
 		)
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
+		.option("-o, --output <file>", "Write output to a file")
 		.addHelpText(
 			"after",
 			`
@@ -24,17 +27,19 @@ Examples:
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab about --json
 `,
 		)
-		.action(async (options) => {
-			const result = await request<Record<string, unknown>>({
-				method: "POST",
-				path: "/v1/channel",
-				body: {
-					channelUrl: options.url,
-					tab: options.tab,
-					sortBy: options.sortBy,
-					continuationToken: options.continuationToken,
-				},
-			});
-			printJson(result.body);
+		.action(async (options: ChannelOptions) => {
+			const result = await withSpinner("Fetching channel…", () =>
+				request<ChannelData>({
+					method: "POST",
+					path: "/v1/channel",
+					body: {
+						channelUrl: options.url,
+						tab: options.tab,
+						sortBy: options.sortBy,
+						continuationToken: options.continuationToken,
+					},
+				}),
+			);
+			handleOutput(result.body, options);
 		});
 }

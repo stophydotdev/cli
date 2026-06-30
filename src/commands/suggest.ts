@@ -1,7 +1,9 @@
 import type { Command } from "commander";
-import { request } from "../client";
-import { CliError } from "../errors";
-import { printJson } from "../output";
+import { request } from "../client.js";
+import { CliError } from "../errors.js";
+import { handleOutput, writeOutput } from "../output.js";
+import { withSpinner } from "../spinner.js";
+import type { SuggestData, SuggestOptions } from "../types/suggest.js";
 
 export function registerSuggestCommand(program: Command) {
 	program
@@ -11,6 +13,7 @@ export function registerSuggestCommand(program: Command) {
 		.option("--hl <lang>", "Language code (default: en)")
 		.option("--gl <country>", "Country code (default: US)")
 		.option("--json", "Print raw JSON")
+		.option("-o, --output <file>", "Write output to a file")
 		.addHelpText(
 			"after",
 			`
@@ -20,24 +23,28 @@ Examples:
   $ stophy suggest --q "recettes" --hl fr --gl FR
 `,
 		)
-		.action(async (options) => {
+		.action(async (options: SuggestOptions) => {
 			if (!options.q?.trim()) {
 				throw new CliError("`--q` is required.");
 			}
 			const params = new URLSearchParams({ q: options.q });
 			if (options.hl) params.set("hl", options.hl);
 			if (options.gl) params.set("gl", options.gl);
-			const result = await request<{ suggestions: string[] }>({
-				method: "GET",
-				path: `/v1/suggest?${params.toString()}`,
-			});
+			const result = await withSpinner("Fetching suggestions…", () =>
+				request<SuggestData>({
+					method: "GET",
+					path: `/v1/suggest?${params.toString()}`,
+				}),
+			);
 			if (options.json) {
-				printJson(result.body);
-			} else {
-				const suggestions = result.body.data?.suggestions ?? [];
-				for (const s of suggestions) {
-					console.log(s);
-				}
+				handleOutput(result.body, options);
+				return;
 			}
+			const suggestions = result.body.data?.suggestions ?? [];
+			writeOutput(
+				suggestions.join("\n"),
+				options.output,
+				Boolean(options.output),
+			);
 		});
 }

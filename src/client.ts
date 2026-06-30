@@ -1,23 +1,8 @@
-import { resolveRuntimeConfig } from "./config";
-import { CliError } from "./errors";
+import { resolveRuntimeConfig } from "./config.js";
+import { CliError } from "./errors.js";
+import type { ApiFailure, ApiSuccess } from "./types/api.js";
 
-export interface ApiCredit {
-	remain: number;
-	used: number;
-}
-
-export interface ApiSuccess<T> {
-	cache: "hit" | "miss";
-	credit: ApiCredit;
-	data: T;
-	success: true;
-}
-
-export interface ApiFailure {
-	details?: unknown;
-	error: string;
-	success: false;
-}
+export type { ApiFailure, ApiSuccess } from "./types/api.js";
 
 export interface RequestResult<T> {
 	body: ApiSuccess<T>;

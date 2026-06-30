@@ -1,6 +1,5 @@
-const ANSI_GREEN = "\x1b[32m";
-const ANSI_RESET = "\x1b[0m";
+import chalk from "chalk";
 
 export function green(text: string) {
-	return process.stdout.isTTY ? `${ANSI_GREEN}${text}${ANSI_RESET}` : text;
+	return chalk.green(text);
 }
