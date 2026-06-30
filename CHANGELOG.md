@@ -1,5 +1,15 @@
 # @stophy/cli
 
+## 1.1.0
+
+### Minor Changes
+
+- a0011a9: Add `stophy init --all --browser` for one-command CLI installation, global agent skill setup, and browser authentication.
+
+### Patch Changes
+
+- 35b9339: Ensure the curl installer updates the currently resolved Stophy executable when possible, with a PATH-safe fallback for installations that are not writable.
+
 ## 1.0.9
 
 ### Patch Changes
