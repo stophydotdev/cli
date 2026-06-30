@@ -107,14 +107,19 @@ verify_checksum() {
 
 ensure_path() {
   local dir="$1"
+  local install_path="$dir/$BINARY_NAME"
+  local current_path
   local shell_name
+
+  current_path="$(command -v "$BINARY_NAME" 2>/dev/null || true)"
+  if [ "$current_path" = "$install_path" ]; then
+    return
+  fi
+
   shell_name="$(basename "${SHELL:-/bin/sh}")"
 
-  case ":$PATH:" in
-    *":$dir:"*) return ;;
-  esac
-
   local rc_file
+  local path_line
   case "$shell_name" in
     zsh)  rc_file="$HOME/.zshrc" ;;
     bash) rc_file="$HOME/.bashrc" ;;
@@ -122,19 +127,33 @@ ensure_path() {
     *)    rc_file="$HOME/.profile" ;;
   esac
 
-  echo "" >> "$rc_file"
+  mkdir -p "$(dirname "$rc_file")"
+
   if [ "$shell_name" = "fish" ]; then
-    echo "set -gx PATH \"$dir\" \$PATH" >> "$rc_file"
+    path_line="fish_add_path -m \"$dir\""
   else
-    echo "export PATH=\"$dir:\$PATH\"" >> "$rc_file"
+    path_line="export PATH=\"$dir:\$PATH\""
   fi
 
-  warn "$dir was not in your PATH. Added it to $rc_file"
-  warn "Run 'source $rc_file' or open a new terminal to use stophy."
+  if ! grep -Fqx "$path_line" "$rc_file" 2>/dev/null; then
+    {
+      echo ""
+      echo "# Stophy CLI"
+      echo "$path_line"
+    } >> "$rc_file"
+  fi
+
+  if [ -n "$current_path" ]; then
+    warn "An existing Stophy CLI at $current_path is shadowing $install_path."
+  else
+    warn "$dir was not active in your PATH."
+  fi
+  warn "Ensured $dir is at the beginning of PATH in $rc_file."
+  warn "Open a new terminal or run: export PATH=\"$dir:\$PATH\""
 }
 
 main() {
-  local os arch version install_dir
+  local os arch version install_dir current_path
 
   os="$(detect_os)"
   arch="$(detect_arch)"
@@ -156,7 +175,23 @@ main() {
     info "Latest version: v$version"
   fi
 
-  install_dir="${STOPHY_INSTALL_DIR:-$HOME/.local/bin}"
+  if [ -n "${STOPHY_INSTALL_DIR:-}" ]; then
+    install_dir="$STOPHY_INSTALL_DIR"
+  else
+    current_path="$(command -v "$BINARY_NAME" 2>/dev/null || true)"
+    if [ -n "$current_path" ] && [ -w "$(dirname "$current_path")" ]; then
+      install_dir="$(dirname "$current_path")"
+      info "Updating existing installation: $current_path"
+      if [ -L "$current_path" ]; then
+        warn "Replacing the package-managed launcher with the standalone Stophy binary."
+      fi
+    else
+      install_dir="$HOME/.local/bin"
+      if [ -n "$current_path" ]; then
+        warn "Existing installation at $current_path is not writable; installing to $install_dir instead."
+      fi
+    fi
+  fi
   mkdir -p "$install_dir"
 
   local binary_name="${BINARY_NAME}-${os}-${arch}"
@@ -194,6 +229,7 @@ main() {
 
   echo ""
   success "Stophy CLI v${version} installed successfully!"
+  echo "  Installed binary: ${install_dir}/stophy"
   echo ""
   echo "  Run 'stophy --help' to get started."
   echo "  Run 'stophy login' to authenticate."
