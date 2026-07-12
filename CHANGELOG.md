@@ -1,5 +1,11 @@
 # @stophy/cli
 
+## 1.2.0
+
+### Minor Changes
+
+- 433be01: Add YouTube Music and YouTube Kids commands, switch suggestions to the POST API, and align CLI request/response types with the current Stophy endpoints.
+
 ## 1.1.0
 
 ### Minor Changes
