@@ -52,6 +52,7 @@ Examples:
 		.command("transcript")
 		.description("Get the transcript for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
+		.option("--lang <lang>", "Transcript language code, e.g. en")
 		.option("--json", "Print raw JSON")
 		.option("-o, --output <file>", "Write output to a file")
 		.addHelpText(
@@ -67,7 +68,11 @@ Examples:
 				request<TranscriptData>({
 					method: "POST",
 					path: "/v1/video",
-					body: { videoUrl: options.url, type: "transcript" },
+					body: {
+						videoUrl: options.url,
+						type: "transcript",
+						lang: options.lang,
+					},
 				}),
 			);
 			handleOutput(result.body, options);
@@ -77,7 +82,7 @@ Examples:
 		.command("comments")
 		.description("Get comments for a YouTube video")
 		.requiredOption("--url <url>", "YouTube video URL")
-		.option("--sortBy <sortBy>", "top or latest")
+		.option("--sortBy <sortBy>", "top, latest, or any")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
 		.option("-o, --output <file>", "Write output to a file")
