@@ -7,9 +7,15 @@ import type { ChannelData, ChannelOptions } from "../types/channel.js";
 export function registerChannelCommand(program: Command) {
 	program
 		.command("channel")
-		.description("Inspect a channel's videos, Shorts, playlists, or about page")
+		.description(
+			"Inspect a channel's videos, Shorts, live streams, community posts, courses, playlists, or about page",
+		)
 		.requiredOption("--url <url>", "YouTube channel URL")
-		.option("--tab <tab>", "video, short, playlist, or about (default: video)")
+		.option("--query <query>", "Search within the channel")
+		.option(
+			"--tab <tab>",
+			"video, short, live, playlist, post, community, course, or about (default: video)",
+		)
 		.option(
 			"--sortBy <sortBy>",
 			"latest, popular, or oldest (only applies with --tab video)",
@@ -24,6 +30,10 @@ Examples:
   $ stophy channel --url "https://www.youtube.com/@t3dotgg"
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab video --sortBy popular
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab playlist
+  $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab post
+	  $ stophy channel --url "https://www.youtube.com/@freecodecamp" --tab community
+	  $ stophy channel --url "https://www.youtube.com/@freecodecamp" --tab course
+  $ stophy channel --url "https://www.youtube.com/@t3dotgg" --query react
   $ stophy channel --url "https://www.youtube.com/@t3dotgg" --tab about --json
 `,
 		)
@@ -34,6 +44,7 @@ Examples:
 					path: "/v1/channel",
 					body: {
 						channelUrl: options.url,
+						query: options.query,
 						tab: options.tab,
 						sortBy: options.sortBy,
 						continuationToken: options.continuationToken,

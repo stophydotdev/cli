@@ -8,12 +8,15 @@ import type { SearchData, SearchOptions } from "../types/search.js";
 export function registerSearchCommand(program: Command) {
 	program
 		.command("search")
-		.description("Search YouTube videos, channels, and playlists")
+		.description(
+			"Search YouTube videos, Shorts, channels, playlists, and movies",
+		)
 		.requiredOption("--q <query>", "Search query")
-		.option("--type <type>", "video, channel, or playlist")
-		.option("--sortBy <sortBy>", "relevance, uploadDate, viewCount, or rating")
-		.option("--uploadDate <uploadDate>", "hour, today, week, month, or year")
+		.option("--type <type>", "video, short, channel, playlist, or movie")
+		.option("--sortBy <sortBy>", "relevance, popularity, date, or rating")
+		.option("--uploadDate <uploadDate>", "today, week, month, or year")
 		.option("--duration <duration>", "short, medium, or long")
+		.option("--features <features>", "Comma-separated feature filters")
 		.option("--continuation-token <token>")
 		.option("--json", "Print raw JSON")
 		.option("-o, --output <file>", "Write output to a file")
@@ -22,8 +25,9 @@ export function registerSearchCommand(program: Command) {
 			`
 Examples:
   $ stophy search --q "machine learning"
-  $ stophy search --q "cooking" --type video --sortBy viewCount
+  $ stophy search --q "cooking" --type video --sortBy popularity
   $ stophy search --q "news" --uploadDate today --duration short
+  $ stophy search --q "ambient music" --features live,hd
   $ stophy search --q "nodejs" --json | jq '.data.items[0]'
 `,
 		)
@@ -41,6 +45,10 @@ Examples:
 						sortBy: options.sortBy,
 						uploadDate: options.uploadDate,
 						duration: options.duration,
+						features: options.features
+							?.split(",")
+							.map((feature) => feature.trim())
+							.filter(Boolean),
 						continuationToken: options.continuationToken,
 					},
 				}),

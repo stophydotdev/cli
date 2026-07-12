@@ -7,8 +7,5 @@ export interface SuggestOptions extends OutputOptions {
 }
 
 export interface SuggestData {
-	q: string;
-	hl: string;
-	gl: string;
 	suggestions: string[];
 }
