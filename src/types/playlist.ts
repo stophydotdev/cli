@@ -8,20 +8,23 @@ export interface PlaylistOptions extends OutputOptions {
 export interface PlaylistInfo {
 	id: string;
 	type: "playlist";
+	url: string;
 	playlistUrl: string;
-	title: string | null;
+	title: string;
 	author: string | null;
 	authorId: string | null;
 	description: string | null;
-	videoCount: string | null;
+	videoCount: number | null;
+	videoCountText: string | null;
 	thumbnails: Thumbnail[];
 }
 
 export interface PlaylistItem {
 	id: string;
 	type: "video";
+	url: string;
 	videoUrl: string;
-	title: string | null;
+	title: string;
 	author: string | null;
 	authorId: string | null;
 	duration: string | null;
@@ -43,5 +46,6 @@ export interface PlaylistData {
 	playlist: PlaylistInfo | null;
 	items: PlaylistItem[];
 	continuationToken: string | null;
-	empty?: EmptyState;
+	hasMore: boolean;
+	empty?: EmptyState | null;
 }
