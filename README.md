@@ -1,6 +1,6 @@
 # @stophy/cli
 
-YouTube context for AI agents. Search, transcripts, comments, channels, playlists — structured JSON from the terminal.
+YouTube context for AI agents. Search, transcripts, comments, channels, playlists, YouTube Music, and YouTube Kids — structured JSON from the terminal.
 
 ## Quick start
 
@@ -44,7 +44,7 @@ export STOPHY_API_KEY="st_..."   # env var also works
 ### search
 
 ```bash
-stophy search --q "typescript tutorial" --type video --sortBy viewCount
+stophy search --q "typescript tutorial" --type video --sortBy popularity
 stophy search --q "next.js" --uploadDate week --duration long
 ```
 
@@ -109,7 +109,7 @@ stophy video comments --url "https://youtube.com/watch?v=QRvfjPltvmE" --sortBy t
 ### video livechat
 
 ```bash
-stophy video livechat --url "https://youtube.com/watch?v=..." --chat-type top
+stophy video livechat --url "https://youtube.com/watch?v=..." --chatType top
 ```
 
 ```json
@@ -128,6 +128,8 @@ stophy video livechat --url "https://youtube.com/watch?v=..." --chat-type top
 
 ```bash
 stophy channel --url "https://youtube.com/@t3dotgg" --tab video --sortBy popular
+stophy channel --url "https://youtube.com/@t3dotgg" --tab post
+stophy channel --url "https://youtube.com/@t3dotgg" --query react
 ```
 
 ```json
@@ -151,6 +153,25 @@ stophy channel --url "https://youtube.com/@t3dotgg" --tab video --sortBy popular
 stophy playlist --url "https://youtube.com/playlist?list=PLxxxx"
 ```
 
+### music
+
+```bash
+stophy music search --q "lofi" --type song
+stophy music suggest --q "jazz"
+stophy music song --url "https://music.youtube.com/watch?v=..."
+stophy music lyrics --url "https://music.youtube.com/watch?v=..."
+stophy music album --url "https://music.youtube.com/browse/MPRE..."
+stophy music artist --url "https://music.youtube.com/channel/UC..."
+stophy music playlist --url "https://music.youtube.com/playlist?list=..."
+```
+
+### kids
+
+```bash
+stophy kids search --q "science"
+stophy kids video --url "https://www.youtubekids.com/watch?v=..."
+```
+
 ### usage and logs
 
 ```bash
@@ -166,6 +187,15 @@ stophy logs --days 30 --endpoint /v1/video
 | `stophy login` | Authenticate with API key or browser |
 | `stophy search` | Search YouTube by keyword |
 | `stophy suggest` | Search autocomplete suggestions |
+| `stophy music search` | Search YouTube Music |
+| `stophy music suggest` | YouTube Music autocomplete suggestions |
+| `stophy music song` | YouTube Music song metadata |
+| `stophy music lyrics` | Song lyrics |
+| `stophy music album` | YouTube Music album metadata and tracks |
+| `stophy music artist` | YouTube Music artist metadata and sections |
+| `stophy music playlist` | YouTube Music playlist tracks |
+| `stophy kids search` | Search YouTube Kids |
+| `stophy kids video` | YouTube Kids video metadata and related videos |
 | `stophy video details` | Video metadata |
 | `stophy video transcript` | Timestamped transcript |
 | `stophy video comments` | Paginated comments |
