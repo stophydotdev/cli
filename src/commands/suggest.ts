@@ -27,13 +27,15 @@ Examples:
 			if (!options.q?.trim()) {
 				throw new CliError("`--q` is required.");
 			}
-			const params = new URLSearchParams({ q: options.q });
-			if (options.hl) params.set("hl", options.hl);
-			if (options.gl) params.set("gl", options.gl);
 			const result = await withSpinner("Fetching suggestions…", () =>
 				request<SuggestData>({
-					method: "GET",
-					path: `/v1/suggest?${params.toString()}`,
+					method: "POST",
+					path: "/v1/suggest",
+					body: {
+						q: options.q,
+						hl: options.hl,
+						gl: options.gl,
+					},
 				}),
 			);
 			if (options.json) {
