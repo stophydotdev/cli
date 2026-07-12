@@ -1,8 +1,8 @@
 import type { EmptyState, OutputOptions, Thumbnail } from "./api.js";
 
-export type SearchType = "video" | "channel" | "playlist";
-export type SearchSortBy = "relevance" | "uploadDate" | "viewCount" | "rating";
-export type SearchUploadDate = "hour" | "today" | "week" | "month" | "year";
+export type SearchType = "video" | "short" | "channel" | "playlist" | "movie";
+export type SearchSortBy = "relevance" | "popularity" | "date" | "rating";
+export type SearchUploadDate = "today" | "week" | "month" | "year";
 export type SearchDuration = "short" | "medium" | "long";
 
 export interface SearchOptions extends OutputOptions {
@@ -11,12 +11,14 @@ export interface SearchOptions extends OutputOptions {
 	sortBy?: SearchSortBy;
 	uploadDate?: SearchUploadDate;
 	duration?: SearchDuration;
+	features?: string;
 	continuationToken?: string;
 }
 
 export interface SearchVideo {
 	type: "video";
 	id: string;
+	url: string;
 	videoUrl: string;
 	title: string;
 	author: string | null;
@@ -38,6 +40,7 @@ export interface SearchVideo {
 export interface SearchShort {
 	type: "short";
 	id: string;
+	url: string;
 	shortUrl: string;
 	title: string;
 	viewCount: number | null;
@@ -48,6 +51,7 @@ export interface SearchShort {
 export interface SearchPlaylist {
 	type: "playlist";
 	id: string;
+	url: string;
 	playlistUrl: string;
 	title: string;
 	author: string | null;
@@ -60,6 +64,7 @@ export interface SearchPlaylist {
 export interface SearchChannel {
 	type: "channel";
 	id: string;
+	url: string;
 	channelUrl: string;
 	name: string;
 	handle: string | null;
@@ -76,19 +81,10 @@ export type SearchItem =
 	| SearchPlaylist
 	| SearchChannel;
 
-export interface SearchQueryEcho {
-	q: string;
-	type?: SearchType;
-	sortBy?: SearchSortBy;
-	uploadDate?: SearchUploadDate;
-	duration?: SearchDuration;
-	features?: string[];
-}
-
 export interface SearchData {
-	query: SearchQueryEcho;
 	items: SearchItem[];
 	continuationToken: string | null;
-	estimatedResults?: number;
-	empty?: EmptyState;
+	hasMore: boolean;
+	estimatedResults: number | null;
+	empty?: EmptyState | null;
 }
