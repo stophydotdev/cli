@@ -10,6 +10,14 @@ export class CliError extends Error {
 	}
 }
 
+export function statusFrom(error: CliError): number | undefined {
+	const details = error.details;
+	if (typeof details !== "object" || details === null || !("status" in details))
+		return undefined;
+	const status = details.status;
+	return typeof status === "number" ? status : undefined;
+}
+
 export function toCliError(error: unknown): CliError {
 	if (error instanceof CliError) {
 		return error;

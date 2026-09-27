@@ -1,8 +1,9 @@
 import type { Command } from "commander";
 import packageJson from "../../package.json" with { type: "json" };
+import { formatBalance, usageDataSchema } from "../account.js";
 import { request } from "../client.js";
 import { getConfigPath, resolveRuntimeConfig } from "../config.js";
-import type { CreditsData } from "../types/account.js";
+import { CliError } from "../errors.js";
 
 function useColor(): boolean {
 	if (process.env.NO_COLOR !== undefined) return false;
@@ -20,15 +21,11 @@ const green = c("\x1b[32m");
 const red = c("\x1b[31m");
 const accent = c("\x1b[38;2;0;98;57m");
 
-function formatNumber(n: number): string {
-	return n.toLocaleString("en-US");
-}
-
 interface StatusResult {
 	version: string;
 	authenticated: boolean;
 	source: string;
-	credits?: { remaining: number };
+	balance?: string;
 	error?: string;
 }
 
@@ -52,13 +49,15 @@ async function getStatus(): Promise<StatusResult> {
 	}
 
 	try {
-		const res = await request<CreditsData>({
+		const response = await request({
 			method: "GET",
-			path: "/v1/credits",
+			path: "/v1/usage",
+			accept: "application/json",
 		});
-		result.credits = {
-			remaining: res.body.data?.credits ?? res.body.creditsRemaining ?? 0,
-		};
+		const usage = usageDataSchema.safeParse(response.json);
+		if (!usage.success)
+			throw new CliError("Server returned an unexpected response shape.");
+		result.balance = formatBalance(usage.data.balanceMicros);
 	} catch (error) {
 		result.error =
 			error instanceof Error ? error.message : "Failed to fetch account info";
@@ -70,7 +69,7 @@ async function getStatus(): Promise<StatusResult> {
 export function registerStatusCommand(program: Command) {
 	program
 		.command("status")
-		.description("Show CLI version, auth status, and credit balance")
+		.description("Show CLI version, auth status, and balance")
 		.option("--json", "Print raw JSON")
 		.action(async (options) => {
 			const status = await getStatus();
@@ -108,10 +107,8 @@ export function registerStatusCommand(program: Command) {
 				console.log(
 					`  ${dim}Could not fetch account info: ${status.error}${reset}`,
 				);
-			} else if (status.credits) {
-				console.log(
-					`  ${dim}Credits:${reset} ${formatNumber(status.credits.remaining)} remaining`,
-				);
+			} else if (status.balance) {
+				console.log(`  ${dim}Balance:${reset} ${status.balance}`);
 			}
 
 			console.log(`  ${dim}Config:${reset}  ${getConfigPath()}`);

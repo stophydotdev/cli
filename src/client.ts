@@ -1,37 +1,47 @@
+import { z } from "zod";
 import { resolveRuntimeConfig } from "./config.js";
 import { CliError } from "./errors.js";
-import type { ApiFailure, ApiSuccess } from "./types/api.js";
 
-export type { ApiFailure, ApiSuccess } from "./types/api.js";
+const errorObject = z.object({
+	code: z.string(),
+	message: z.string(),
+	retryable: z.boolean(),
+	retryAfterSeconds: z.number().int().nonnegative().optional(),
+	requestId: z.string().optional(),
+});
 
-export interface RequestResult<T> {
-	body: ApiSuccess<T>;
-	rateLimit: {
-		limit: string | null;
-		remaining: string | null;
-		reset: string | null;
-	};
-	raw: ApiSuccess<T> | ApiFailure;
-	status: number;
-}
+const failureSchema = z.union([
+	z.object({ error: z.string() }),
+	z.object({ error: errorObject }),
+]);
 
 export interface RequestOptions {
-	body?: Record<string, unknown>;
-	method: "GET" | "POST";
-	params?: Record<string, string | undefined>;
-	path: string;
+	readonly method: "GET" | "POST";
+	readonly path: string;
+	readonly body?: Record<string, unknown>;
+	readonly params?: Record<string, string | undefined>;
+	readonly accept: "application/json" | "text/markdown";
 }
 
-export async function request<T>(
-	options: RequestOptions,
-): Promise<RequestResult<T>> {
-	const { apiKey, baseUrl, sessionCookie } = await resolveRuntimeConfig();
+export interface HttpResponse {
+	readonly status: number;
+	readonly text: string;
+	readonly json: unknown;
+	readonly retryAfter: string | null;
+	readonly creditsUsed: string | null;
+	readonly rateLimit: {
+		readonly limit: string | null;
+		readonly remaining: string | null;
+		readonly reset: string | null;
+	};
+}
 
+/** The only HTTP path. Throws `CliError` on network failure and non-2xx responses. */
+export async function request(options: RequestOptions): Promise<HttpResponse> {
+	const { apiKey, baseUrl, sessionCookie } = await resolveRuntimeConfig();
 	const url = new URL(options.path, `${baseUrl}/`);
 	for (const [key, value] of Object.entries(options.params ?? {})) {
-		if (value) {
-			url.searchParams.set(key, value);
-		}
+		if (value) url.searchParams.set(key, value);
 	}
 
 	let response: Response;
@@ -39,55 +49,82 @@ export async function request<T>(
 		response = await fetch(url, {
 			method: options.method,
 			headers: {
+				Accept: options.accept,
 				...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
 				...(sessionCookie ? { Cookie: sessionCookie } : {}),
-				"Content-Type": "application/json",
+				...(options.method === "POST"
+					? { "Content-Type": "application/json" }
+					: {}),
 			},
 			...(options.method === "POST"
 				? { body: JSON.stringify(options.body ?? {}) }
 				: {}),
 		});
 	} catch (error) {
+		const reason = error instanceof Error ? error.message : "network error";
 		throw new CliError(
-			`Network request failed for ${url.toString()}: ${(error as Error).message}`,
+			`Network request failed for ${url.toString()}: ${reason}`,
 		);
 	}
 
-	let raw: unknown;
-	try {
-		raw = await response.json();
-	} catch {
-		throw new CliError(
-			`Server returned a non-JSON response with status ${response.status}.`,
-		);
-	}
-
-	const rateLimit = {
-		limit: response.headers.get("X-RateLimit-Limit"),
-		remaining: response.headers.get("X-RateLimit-Remaining"),
-		reset: response.headers.get("X-RateLimit-Reset"),
-	};
-
+	const text = await response.text();
+	const json = parseJsonBody(text, response.headers.get("content-type"));
+	const retryAfter = response.headers.get("Retry-After");
 	if (!response.ok) {
-		const failure = raw as Partial<ApiFailure>;
-		throw new CliError(
-			typeof failure.error === "string"
-				? failure.error
-				: `Request failed with status ${response.status}.`,
-			1,
-			{ rateLimit, status: response.status },
-		);
-	}
-
-	const body = raw as Partial<ApiSuccess<T>>;
-	if (body.success !== true || !("data" in body)) {
-		throw new CliError("Server returned an unexpected response shape.");
+		throw new CliError(failureMessage(json, response.status, retryAfter), 1, {
+			status: response.status,
+			...(retryAfter ? { retryAfter } : {}),
+		});
 	}
 
 	return {
-		body: body as ApiSuccess<T>,
-		raw: body as ApiSuccess<T>,
-		rateLimit,
 		status: response.status,
+		text,
+		json,
+		retryAfter,
+		creditsUsed: response.headers.get("x-credits-used"),
+		rateLimit: {
+			limit: response.headers.get("X-RateLimit-Limit"),
+			remaining: response.headers.get("X-RateLimit-Remaining"),
+			reset: response.headers.get("X-RateLimit-Reset"),
+		},
 	};
+}
+
+function parseJsonBody(text: string, contentType: string | null): unknown {
+	const trimmed = text.trim();
+	const looksJson =
+		(contentType ?? "").includes("json") ||
+		trimmed.startsWith("{") ||
+		trimmed.startsWith("[");
+	if (!looksJson) return undefined;
+	try {
+		return parseJson(text);
+	} catch {
+		return undefined;
+	}
+}
+
+function parseJson(text: string): unknown {
+	return JSON.parse(text);
+}
+
+function failureMessage(
+	body: unknown,
+	status: number,
+	retryAfter: string | null,
+): string {
+	const parsed = failureSchema.safeParse(body);
+	const retryFromBody =
+		parsed.success && typeof parsed.data.error !== "string"
+			? parsed.data.error.retryAfterSeconds
+			: undefined;
+	const retry =
+		retryAfter ?? (retryFromBody === undefined ? null : String(retryFromBody));
+	const message = parsed.success
+		? typeof parsed.data.error === "string"
+			? parsed.data.error
+			: parsed.data.error.message
+		: `Request failed with status ${status}.`;
+	return retry === null ? message : `${message} Retry after ${retry}s.`;
 }

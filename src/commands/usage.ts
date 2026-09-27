@@ -1,16 +1,16 @@
 import type { Command } from "commander";
+import { formatBalance, usageDataSchema } from "../account.js";
 import { request } from "../client.js";
 import { CliError } from "../errors.js";
-import { printUsage } from "../output.js";
-import type { UsageData, UsageOptions } from "../types/account.js";
-
-const VALID_DAYS = new Set(["today", "7", "30"]);
+import { handleOutput, writeOutput } from "../output.js";
+import type { OutputOptions } from "../types/api.js";
 
 export function registerUsageCommand(program: Command) {
 	program
 		.command("usage")
-		.description("Show API usage for your key")
-		.option("--days <days>", "today, 7, or 30", "7")
+		.description(
+			"Show the balance, credits used, and request count for your API key",
+		)
 		.option("--json", "Print raw JSON")
 		.option("-o, --output <file>", "Write output to a file")
 		.addHelpText(
@@ -18,19 +18,28 @@ export function registerUsageCommand(program: Command) {
 			`
 Examples:
   $ stophy usage
-  $ stophy usage --days today
-  $ stophy usage --days 30 --json
+  $ stophy usage --json
 `,
 		)
-		.action(async (options: UsageOptions) => {
-			if (!VALID_DAYS.has(String(options.days))) {
-				throw new CliError("`--days` must be one of: today, 7, 30.");
-			}
-			const result = await request<UsageData>({
+		.action(async (options: OutputOptions) => {
+			const response = await request({
 				method: "GET",
 				path: "/v1/usage",
-				params: { days: String(options.days) },
+				accept: "application/json",
 			});
-			printUsage(result, options);
+			const parsed = usageDataSchema.safeParse(response.json);
+			if (!parsed.success)
+				throw new CliError("Server returned an unexpected response shape.");
+			if (options.json || options.output) {
+				handleOutput(parsed.data, options);
+				return;
+			}
+			writeOutput(
+				[
+					`balance: ${formatBalance(parsed.data.balanceMicros)}`,
+					`credits used: ${parsed.data.creditsUsed}`,
+					`requests: ${parsed.data.requestCount}`,
+				].join("\n"),
+			);
 		});
 }

@@ -1,6 +1,9 @@
 import type { Command } from "commander";
 import packageJson from "../../package.json" with { type: "json" };
+import { creditsFromMicros, usageDataSchema } from "../account.js";
+import { request } from "../client.js";
 import { getConfigPath, resolveRuntimeConfig } from "../config.js";
+import { CliError, statusFrom } from "../errors.js";
 import { compareVersions, getLatestVersion } from "../npm-registry.js";
 
 type CheckStatus = "pass" | "warn" | "fail";
@@ -60,34 +63,25 @@ interface ApiPing {
 	credits?: number;
 }
 
-async function pingCredits(
-	apiKey: string | undefined,
-	sessionCookie: string | undefined,
-	baseUrl: string,
-): Promise<ApiPing> {
-	const url = new URL("/v1/credits", `${baseUrl}/`);
+async function pingUsage(): Promise<ApiPing> {
 	const start = Date.now();
 	try {
-		const response = await fetch(url, {
+		const response = await request({
 			method: "GET",
-			headers: {
-				...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-				...(sessionCookie ? { Cookie: sessionCookie } : {}),
-				"Content-Type": "application/json",
-			},
+			path: "/v1/usage",
+			accept: "application/json",
 		});
-		const durationMs = Date.now() - start;
-		let credits: number | undefined;
-		try {
-			const body = (await response.json()) as { data?: { credits?: number } };
-			credits = body.data?.credits;
-		} catch {
-			credits = undefined;
-		}
-		return { status: response.status, durationMs, credits };
+		const usage = usageDataSchema.safeParse(response.json);
+		return {
+			status: response.status,
+			durationMs: Date.now() - start,
+			credits: usage.success
+				? creditsFromMicros(usage.data.balanceMicros)
+				: undefined,
+		};
 	} catch (error) {
 		return {
-			status: 0,
+			status: error instanceof CliError ? (statusFrom(error) ?? 0) : 0,
 			durationMs: Date.now() - start,
 			error: error instanceof Error ? error.message : "Unknown error",
 		};
@@ -254,9 +248,7 @@ async function runChecks(): Promise<CheckResult[]> {
 
 	const [latest, ping] = await Promise.all([
 		getLatestVersion(packageJson.name),
-		apiKey || sessionCookie
-			? pingCredits(apiKey, sessionCookie, baseUrl)
-			: Promise.resolve(null),
+		apiKey || sessionCookie ? pingUsage() : Promise.resolve(null),
 	]);
 
 	return [
