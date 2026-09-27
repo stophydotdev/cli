@@ -41,9 +41,9 @@ scripts/
 homebrew/
   stophy.rb            # Homebrew formula
 .github/workflows/
-  publish.yml          # tokenless npm publish via trusted publishing
+  publish.yml          # manual npm release (Run workflow); trusted publishing
   version.yml          # Changesets version PR on main
-  release-binaries.yml # build + attach binaries on tag
+  release-binaries.yml # manual binaries + Linux packages release (Run workflow)
   test.yml             # build + biome check on PR
 .changeset/
   config.json          # Changesets release config
@@ -132,7 +132,7 @@ Changesets owns release intent and version bumps.
 - `bun run build:binary` (`scripts/build-binaries.sh`) cross-compiles standalone binaries via `bun build --compile`, named `stophy-<os>-<arch>`.
 - `scripts/install.sh` / `install.ps1` are the `curl|bash` / `irm|iex` installers; they fetch release binaries from the GitHub releases of `stophydotdev/cli`.
 - `homebrew/stophy.rb` and `nfpm.yaml` cover Homebrew and Linux package managers.
-- GitHub Actions: `test.yml` (PR build + lint), `version.yml` (Changesets version PR), `publish.yml` (npm trusted publishing, no npm token), `release-binaries.yml` (binaries and Linux packages on version tag).
+- GitHub Actions: `test.yml` (PR build + lint), `version.yml` (Changesets version PR), `publish.yml` (manual npm release via trusted publishing, no npm token), `release-binaries.yml` (manual binaries and Linux packages release). Merging to `main` never publishes.
 - npm trusted publishing must point at `.github/workflows/publish.yml`. Do not reintroduce `NPM_TOKEN` / `NODE_AUTH_TOKEN` for the normal publish path.
 
 ## package.json
