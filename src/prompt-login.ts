@@ -11,6 +11,7 @@ import {
 	setStoredApiKey,
 	validateApiKey,
 } from "./config.js";
+import { loginCode } from "./login-code.js";
 
 const err = (msg: string) => process.stderr.write(`${msg}\n`);
 
@@ -40,6 +41,8 @@ export async function doBrowserLogin(options?: { promptBeforeOpen?: boolean }) {
 
 	err("");
 	err(green(loginUrl));
+	err("");
+	err(`Your code: ${loginCode(codeChallenge)}`);
 	err("");
 	if (options?.promptBeforeOpen !== false) {
 		await prompt("Press Enter to open your browser...");

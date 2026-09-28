@@ -440,6 +440,7 @@ export function parseCall(
 ): ParseResult {
 	const slots = slotsFromInput(input);
 	const byFlag = new Map(slots.map((slot) => [slot.flag, slot]));
+	const positional = positionalSlot(slots);
 	const body: Record<string, unknown> = {};
 	const setFlags = new Set<string>();
 	let format: ParsedCall["format"] = "markdown";
@@ -455,8 +456,15 @@ export function parseCall(
 			if (extra !== undefined) return fail(`Unexpected argument \`${extra}\`.`);
 			break;
 		}
-		if (!token.startsWith("-"))
-			return fail(`Unexpected argument \`${token}\`.`);
+		if (!token.startsWith("-")) {
+			if (positional === undefined || setFlags.has(positional.flag))
+				return fail(`Unexpected argument \`${token}\`.`);
+			const value = readFlag(positional, token, false, true);
+			if (!value.ok) return value;
+			setValue(body, positional.flag, value.value);
+			setFlags.add(positional.flag);
+			continue;
+		}
 		if (token === "--json") {
 			if (sawJson) return fail("Flag --json was given twice.");
 			sawJson = true;
@@ -880,59 +888,202 @@ export function creditPhrase(credits: number, perItems: number | null): string {
 export function costLine(endpoint: {
 	readonly credits: number;
 	readonly perItems: number | null;
-	readonly keyless: boolean;
-	readonly cacheTtlSeconds?: number;
 }): string {
-	const free = endpoint.keyless ? ", free without an API key" : "";
-	const cache =
-		endpoint.cacheTtlSeconds === undefined
-			? ""
-			: `, cached ${endpoint.cacheTtlSeconds}s`;
-	return `Costs ${creditPhrase(endpoint.credits, endpoint.perItems)}${free}${cache}.`;
+	return `Cost: ${creditPhrase(endpoint.credits, endpoint.perItems)}.`;
 }
 
-/** Help text for `stophy <source> <endpoint> --help`. */
+export function positionalSlot(slots: readonly Slot[]): StringSlot | undefined {
+	const required = slots.filter((slot) => slot.always);
+	const only = required[0];
+	if (required.length !== 1 || only === undefined) return undefined;
+	if (only.kind !== "string" || only.flag.includes(".")) return undefined;
+	return only;
+}
+
+/** Help text for `stophy <source> <command> --help`. */
 export function formatEndpointHelp(endpoint: CatalogEndpoint): string {
 	const slots = slotsFromInput(endpoint.input);
-	const example = [
-		`stophy ${endpoint.id.split(".").join(" ")}`,
-		...examplePieces(slots),
-	].join(" ");
+	const positional = positionalSlot(slots);
+	const words = endpoint.id.split(".").join(" ");
+	const usage = positional
+		? `stophy ${words} <${argName(positional.flag)}> [options]`
+		: `stophy ${words} [options]`;
+	const rows: [string, string][] = [
+		...slots
+			.filter((slot) => slot !== positional)
+			.map((slot): [string, string] => [optionName(slot), optionText(slot)]),
+		["--json", "Output as JSON"],
+		["-o, --output <path>", "Write to a file"],
+	];
 	return [
+		`Usage: ${usage}`,
+		...(endpoint.summary ? ["", `${endpoint.summary}.`] : []),
 		"",
-		costLine(endpoint),
-		"",
-		"Fields:",
-		...(slots.length === 0
-			? ["  (no fields)"]
-			: slots.map((slot) => `  ${formatSlot(slot)}`)),
-		"",
-		"Output:",
-		"  --json  print the data as JSON; credits used go to stderr",
-		"  --raw  print the full JSON envelope",
-		"  -o, --output <file>  write the output to a file",
+		"Options:",
+		...alignRows(rows),
 		"",
 		"Example:",
-		`  ${example}`,
+		`  ${exampleLine(endpoint, slots, positional)}`,
+		"",
 	].join("\n");
 }
 
-/** Readable catalog entry for `stophy describe <id>`. */
+/** Readable entry for `stophy describe <id>`. */
 export function formatDescribe(endpoint: CatalogEndpoint): string {
 	const slots = slotsFromInput(endpoint.input);
+	const positional = positionalSlot(slots);
+	const rows = slots.map((slot): [string, string] => [
+		slot === positional ? `<${argName(slot.flag)}>` : optionName(slot),
+		optionText(slot),
+	]);
 	return [
 		endpoint.id,
-		`${endpoint.method} ${endpoint.path}`,
+		...(endpoint.summary ? [`${endpoint.summary}.`] : []),
 		costLine(endpoint),
 		"",
-		"Input:",
-		...(slots.length === 0
-			? ["  (no fields)"]
-			: slots.map((slot) => `  ${formatSlot(slot)}`)),
+		"Options:",
+		...(rows.length === 0 ? ["  (none)"] : alignRows(rows)),
 		"",
-		"Schema:",
-		JSON.stringify(endpoint.input, null, 2),
+		"Example:",
+		`  ${exampleLine(endpoint, slots, positional)}`,
 	].join("\n");
+}
+
+const KNOWN_TEXT: Readonly<Record<string, string>> = {
+	cursor: "Get the next page, from a previous result",
+	limit: "Number of results",
+	country: "Country code, e.g. us, de",
+	language: "Language code, e.g. en, pt-BR",
+};
+
+function alignRows(rows: readonly (readonly [string, string])[]): string[] {
+	const width = Math.max(...rows.map(([name]) => name.length)) + 2;
+	return rows.map(([name, text]) =>
+		text.length === 0 ? `  ${name}` : `  ${name.padEnd(width)}${text}`,
+	);
+}
+
+function argName(flag: string): string {
+	const last = flag.split(".").at(-1) ?? flag;
+	return last.replace(/([a-z0-9])([A-Z])/gu, "$1-$2").toLowerCase();
+}
+
+function optionName(slot: Slot): string {
+	if (slot.kind === "boolean") return `--${slot.flag}`;
+	if (slot.kind === "array") return `--${slot.flag} <list>`;
+	if (slot.kind === "json") return `--${slot.flag} <json>`;
+	if (slot.kind === "integer" || slot.kind === "number")
+		return `--${slot.flag} <number>`;
+	return `--${slot.flag} <${argName(slot.flag)}>`;
+}
+
+function optionText(slot: Slot): string {
+	const main = mainText(slot);
+	const extras: string[] = [];
+	if (slot.always) extras.push("required");
+	else if (slot.whenGroup) extras.push(`required with ${slot.whenGroup}`);
+	if (slot.defaultLabel !== undefined)
+		extras.push(`default: ${slot.defaultLabel}`);
+	const max = maxOf(slot);
+	if (max !== undefined) extras.push(`max: ${max}`);
+	return extras.length === 0 ? main : `${main} (${extras.join(", ")})`;
+}
+
+function mainText(slot: Slot): string {
+	const last = slot.flag.split(".").at(-1) ?? slot.flag;
+	const known = KNOWN_TEXT[slot.flag];
+	if (known) return known;
+	if (slot.kind === "array") {
+		const values = enumOf(slot.item);
+		if (values.length === 0) return "Comma-separated list";
+		const shown = values.slice(0, 6).join(", ");
+		return `Comma-separated: ${shown}${values.length > 6 ? ", …" : ""}`;
+	}
+	if (slot.kind !== "json" && slot.kind !== "boolean") {
+		const values = enumOf(slot);
+		if (values.length > 0) return orList(values);
+	}
+	const described = cleanDescription(slot.description);
+	if (described) return described;
+	if (last === "min" || last === "max") {
+		const owner = humanize(slot.flag.split(".").slice(0, -1).join(" "));
+		return `${last === "min" ? "Minimum" : "Maximum"} ${owner.toLowerCase()}`;
+	}
+	return humanize(slot.flag.replaceAll(".", " "));
+}
+
+function enumOf(slot: ScalarSlot): string[] {
+	if (slot.kind === "boolean") return [];
+	return (slot.enumValues ?? []).map(String);
+}
+
+function orList(values: readonly string[]): string {
+	if (values.length === 1) return values[0] ?? "";
+	return `${values.slice(0, -1).join(", ")} or ${values.at(-1)}`;
+}
+
+function maxOf(slot: Slot): number | undefined {
+	if (slot.kind === "integer" || slot.kind === "number") {
+		if (slot.enumValues && slot.enumValues.length > 0) return undefined;
+		return slot.maximum;
+	}
+	if (slot.kind === "array")
+		return enumOf(slot.item).length > 0 ? undefined : slot.maxItems;
+	return undefined;
+}
+
+function cleanDescription(description: string | undefined): string | undefined {
+	if (!description) return undefined;
+	const first = description
+		.split(/(?<=\.)\s+/u)
+		.filter((part) => !/any case is accepted/iu.test(part))[0];
+	const text = first?.replace(/\.+$/u, "").trim();
+	if (!text) return undefined;
+	return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function humanize(name: string): string {
+	const words = name
+		.replace(/([a-z0-9])([A-Z])/gu, "$1 $2")
+		.toLowerCase()
+		.trim();
+	return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+function exampleLine(
+	endpoint: CatalogEndpoint,
+	slots: readonly Slot[],
+	positional: StringSlot | undefined,
+): string {
+	const words = endpoint.id.split(".").join(" ");
+	const sample = isRecord(endpoint.example) ? endpoint.example : undefined;
+	const pieces: string[] = [`stophy ${words}`];
+	if (positional) {
+		const value = sample?.[positional.flag];
+		pieces.push(quoteArg(typeof value === "string" ? value : "..."));
+	}
+	const extras = sample
+		? Object.entries(sample).filter(
+				([key, value]) =>
+					key !== positional?.flag &&
+					key !== "cursor" &&
+					(typeof value === "string" ||
+						typeof value === "number" ||
+						typeof value === "boolean"),
+			)
+		: [];
+	for (const [key, value] of extras.slice(0, 2)) {
+		pieces.push(
+			value === true ? `--${key}` : `--${key} ${quoteArg(String(value))}`,
+		);
+	}
+	if (!sample)
+		pieces.push(...examplePieces(slots.filter((slot) => slot !== positional)));
+	return pieces.join(" ");
+}
+
+function quoteArg(value: string): string {
+	return /^[A-Za-z0-9._:/@,+-]+$/u.test(value) ? value : JSON.stringify(value);
 }
 
 /** `stophy endpoints` listing. Keyless endpoints are marked free. */
@@ -966,138 +1117,6 @@ export function formatEndpointIndex(
 			return `${row.id.padEnd(idWidth)}  ${cost.padEnd(costWidth)}${free}`;
 		})
 		.join("\n");
-}
-
-export function formatSlot(slot: Slot): string {
-	const name =
-		slot.kind === "boolean"
-			? `--${slot.flag}`
-			: `--${slot.flag} ${placeholder(slot)}`;
-	const text = sentence(slotDetails(slot));
-	return text.length === 0 ? name : `${name}  ${text}`;
-}
-
-function slotDetails(slot: Slot): string[] {
-	const parts: string[] = [];
-	if (slot.always) parts.push("required");
-	else if (slot.whenGroup) parts.push(`required when ${slot.whenGroup} is set`);
-	parts.push(...limitText(slot));
-	if (slot.defaultLabel !== undefined)
-		parts.push(`default ${slot.defaultLabel}`);
-	if (slot.description) parts.push(slot.description);
-	return parts;
-}
-
-function limitText(slot: Slot): string[] {
-	if (slot.kind === "boolean") return ["boolean"];
-	if (slot.kind === "json") return ["JSON value"];
-	if (slot.kind === "array") {
-		const parts = [
-			"repeatable or comma-separated",
-			...scalarLimitText(slot.item),
-		];
-		if (slot.minItems !== undefined && slot.minItems > 1)
-			parts.push(`at least ${slot.minItems}`);
-		if (slot.maxItems !== undefined) parts.push(`at most ${slot.maxItems}`);
-		return parts;
-	}
-	return scalarLimitText(slot);
-}
-
-function scalarLimitText(slot: ScalarSlot): string[] {
-	if (slot.kind === "boolean") return [];
-	if (slot.kind === "string") {
-		const parts: string[] = [];
-		if (slot.enumValues && slot.enumValues.length > 0) {
-			parts.push(`one of ${slot.enumValues.join(", ")}`);
-		}
-		if (slot.format) parts.push(slot.format);
-		const length = lengthText(slot.minLength, slot.maxLength);
-		if (length) parts.push(length);
-		return parts;
-	}
-	const parts: string[] = [];
-	if (slot.enumValues && slot.enumValues.length > 0) {
-		parts.push(`one of ${slot.enumValues.join(", ")}`);
-	}
-	const range = rangeText(slot);
-	if (range) parts.push(range);
-	return parts;
-}
-
-function lengthText(
-	minLength: number | undefined,
-	maxLength: number | undefined,
-): string | undefined {
-	if (minLength !== undefined && minLength > 0 && maxLength !== undefined) {
-		return `${minLength}-${maxLength} characters`;
-	}
-	if (minLength !== undefined && minLength > 0)
-		return `at least ${minLength} characters`;
-	if (maxLength !== undefined) return `at most ${maxLength} characters`;
-	return undefined;
-}
-
-function rangeText(slot: NumberSlot): string | undefined {
-	if (slot.exclusiveMinimum !== undefined && slot.maximum !== undefined) {
-		return `greater than ${slot.exclusiveMinimum}, at most ${slot.maximum}`;
-	}
-	if (slot.minimum !== undefined && slot.maximum !== undefined) {
-		return `${slot.minimum}-${slot.maximum}`;
-	}
-	if (slot.exclusiveMinimum !== undefined)
-		return `greater than ${slot.exclusiveMinimum}`;
-	if (slot.exclusiveMaximum !== undefined)
-		return `less than ${slot.exclusiveMaximum}`;
-	if (slot.minimum !== undefined) return `at least ${slot.minimum}`;
-	if (slot.maximum !== undefined) return `at most ${slot.maximum}`;
-	return undefined;
-}
-
-function placeholder(slot: Slot): string {
-	switch (slot.kind) {
-		case "string":
-			return "<string>";
-		case "integer":
-			return "<integer>";
-		case "number":
-			return "<number>";
-		case "json":
-			return "<json>";
-		case "boolean":
-			return "";
-		case "array":
-			return `${scalarPlaceholder(slot.item)}...`;
-		default: {
-			const unreachable: never = slot;
-			return unreachable;
-		}
-	}
-}
-
-function scalarPlaceholder(slot: ScalarSlot): string {
-	switch (slot.kind) {
-		case "string":
-			return "<string>";
-		case "integer":
-			return "<integer>";
-		case "number":
-			return "<number>";
-		case "boolean":
-			return "<boolean>";
-		default: {
-			const unreachable: never = slot;
-			return unreachable;
-		}
-	}
-}
-
-function sentence(parts: readonly string[]): string {
-	const cleaned = parts
-		.map((part) => part.replace(/\.+$/u, ""))
-		.filter((part) => part.length > 0);
-	if (cleaned.length === 0) return "";
-	return `${cleaned.join(". ")}.`;
 }
 
 function examplePieces(slots: readonly Slot[]): string[] {

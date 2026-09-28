@@ -9,10 +9,8 @@ export function registerEndpointsCommand(
 ) {
 	program
 		.command("endpoints")
-		.description(
-			"List endpoints, with credits and a free marker for keyless ones",
-		)
-		.argument("[term]", "Only show ids that contain this text")
+		.description("List every command with its cost")
+		.argument("[term]", "Only show commands that contain this text")
 		.addHelpText(
 			"after",
 			`

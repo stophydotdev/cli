@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { CliError } from "./errors.js";
+import { deviceName } from "./login-code.js";
 
 export interface BrowserLoginResult {
 	apiKey: string;
@@ -21,16 +22,23 @@ export async function startBrowserLogin(
 		.update(codeVerifier)
 		.digest("base64url");
 
-	const initRes = await fetch(new URL("/api/cli/init", `${baseUrl}/`), {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			session_id: sessionId,
-			code_challenge: codeChallenge,
-		}),
-	}).catch((err: Error) => {
-		throw new CliError(`Could not reach Stophy API: ${err.message}`);
-	});
+	const start = (device: string | undefined) =>
+		fetch(new URL("/api/cli/init", `${baseUrl}/`), {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				session_id: sessionId,
+				code_challenge: codeChallenge,
+				...(device === undefined ? {} : { device_name: device }),
+			}),
+		}).catch((err: Error) => {
+			throw new CliError(`Could not reach Stophy API: ${err.message}`);
+		});
+
+	const device = deviceName();
+	let initRes = await start(device);
+	if (initRes.status === 400 && device !== undefined)
+		initRes = await start(undefined);
 
 	if (!initRes.ok) {
 		const body = (await initRes.json().catch(() => ({}))) as {

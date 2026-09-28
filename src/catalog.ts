@@ -9,6 +9,7 @@ const CATALOG_TTL_MS = 5 * 60 * 1000;
 
 export const endpointSchema = z.object({
 	id: z.string().min(1),
+	summary: z.string().min(1).optional(),
 	method: z.literal("POST"),
 	path: z.string().min(1),
 	credits: z.number().int().nonnegative(),
@@ -16,22 +17,36 @@ export const endpointSchema = z.object({
 	perItems: z.number().int().positive().nullable(),
 	cacheTtlSeconds: z.number().int().nonnegative(),
 	input: z.record(z.string(), z.unknown()),
+	example: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 export type CatalogEndpoint = z.infer<typeof endpointSchema>;
 
+const sourceSchema = z.object({
+	id: z.string().min(1),
+	summary: z.string().min(1),
+});
+
+export type CatalogSource = z.infer<typeof sourceSchema>;
+
+export interface Catalog {
+	readonly endpoints: readonly CatalogEndpoint[];
+	readonly sources: readonly CatalogSource[];
+}
+
 const catalogResponseSchema = z.object({
 	endpoints: z.array(endpointSchema),
+	sources: z.array(sourceSchema).optional(),
 });
 
 const storedSchema = z.object({
 	fetchedAt: z.string().min(1),
 	endpoints: z.array(endpointSchema),
+	sources: z.array(sourceSchema).optional(),
 });
 
-interface StoredCatalog {
+interface StoredCatalog extends Catalog {
 	readonly fetchedAt: number;
-	readonly endpoints: readonly CatalogEndpoint[];
 }
 
 export type CatalogPlan = "fetch" | "fresh" | "stale";
@@ -56,34 +71,31 @@ export async function loadCatalog(options: {
 	readonly file: string;
 	readonly now: number;
 	readonly force: boolean;
-	readonly fetch: () => Promise<readonly CatalogEndpoint[]>;
+	readonly fetch: () => Promise<Catalog>;
 	readonly warn: (message: string) => void;
-}): Promise<{
-	endpoints: readonly CatalogEndpoint[];
-	background?: Promise<void>;
-}> {
+}): Promise<Catalog & { background?: Promise<void> }> {
 	const cached = await readStored(options.file);
 	const plan = planCatalog({
 		fetchedAt: cached?.fetchedAt,
 		now: options.now,
 		force: options.force,
 	});
-	if (plan === "fresh" && cached) return { endpoints: cached.endpoints };
+	if (plan === "fresh" && cached) return catalogOf(cached);
 	if (plan === "stale" && cached) {
 		return {
-			endpoints: cached.endpoints,
+			...catalogOf(cached),
 			background: refresh(options, cached.fetchedAt),
 		};
 	}
 	try {
-		const endpoints = await options.fetch();
-		assertCatalog(endpoints);
-		await writeStored(options.file, endpoints);
-		return { endpoints };
+		const catalog = await options.fetch();
+		assertCatalog(catalog.endpoints);
+		await writeStored(options.file, catalog);
+		return catalog;
 	} catch (error) {
 		if (!options.force && cached) {
 			options.warn(staleWarning(error, cached.fetchedAt));
-			return { endpoints: cached.endpoints };
+			return catalogOf(cached);
 		}
 		if (error instanceof CliError) throw error;
 		const reason = error instanceof Error ? error.message : "network error";
@@ -91,7 +103,11 @@ export async function loadCatalog(options: {
 	}
 }
 
-export async function fetchCatalog(): Promise<readonly CatalogEndpoint[]> {
+function catalogOf(stored: StoredCatalog): Catalog {
+	return { endpoints: stored.endpoints, sources: stored.sources };
+}
+
+export async function fetchCatalog(): Promise<Catalog> {
 	const response = await request({
 		method: "GET",
 		path: "/v1/endpoints",
@@ -101,22 +117,25 @@ export async function fetchCatalog(): Promise<readonly CatalogEndpoint[]> {
 	if (!parsed.success)
 		throw new CliError("Server returned an unexpected endpoint catalog.");
 	assertCatalog(parsed.data.endpoints);
-	return parsed.data.endpoints;
+	return {
+		endpoints: parsed.data.endpoints,
+		sources: parsed.data.sources ?? [],
+	};
 }
 
 function refresh(
 	options: {
 		readonly file: string;
-		readonly fetch: () => Promise<readonly CatalogEndpoint[]>;
+		readonly fetch: () => Promise<Catalog>;
 		readonly warn: (message: string) => void;
 	},
 	fetchedAt: number,
 ): Promise<void> {
 	return options
 		.fetch()
-		.then(async (endpoints) => {
-			assertCatalog(endpoints);
-			await writeStored(options.file, endpoints);
+		.then(async (catalog) => {
+			assertCatalog(catalog.endpoints);
+			await writeStored(options.file, catalog);
 		})
 		.catch((error: unknown) => {
 			options.warn(staleWarning(error, fetchedAt));
@@ -163,15 +182,16 @@ async function readStored(file: string): Promise<StoredCatalog | undefined> {
 	} catch {
 		return undefined;
 	}
-	return { fetchedAt, endpoints: parsed.data.endpoints };
+	return {
+		fetchedAt,
+		endpoints: parsed.data.endpoints,
+		sources: parsed.data.sources ?? [],
+	};
 }
 
-async function writeStored(
-	file: string,
-	endpoints: readonly CatalogEndpoint[],
-): Promise<void> {
+async function writeStored(file: string, catalog: Catalog): Promise<void> {
 	await mkdir(dirname(file), { recursive: true });
-	const payload = `${JSON.stringify({ fetchedAt: new Date().toISOString(), endpoints }, null, 2)}\n`;
+	const payload = `${JSON.stringify({ fetchedAt: new Date().toISOString(), endpoints: catalog.endpoints, sources: catalog.sources }, null, 2)}\n`;
 	const temporary = `${file}.${process.pid}.tmp`;
 	await writeFile(temporary, payload, "utf8");
 	await rename(temporary, file);

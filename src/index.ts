@@ -9,7 +9,7 @@ import {
 	stripGlobalRefresh,
 } from "./argv.js";
 import {
-	type CatalogEndpoint,
+	type Catalog,
 	catalogFilePath,
 	fetchCatalog,
 	loadCatalog,
@@ -43,27 +43,24 @@ const NO_AUTH_COMMANDS = new Set([
 	"help",
 ]);
 
-function buildProgram(endpoints: readonly CatalogEndpoint[]): Command {
+function buildProgram({ endpoints, sources }: Catalog): Command {
 	const program = new Command();
 	const byId = new Map(endpoints.map((endpoint) => [endpoint.id, endpoint]));
 
 	program
 		.name("stophy")
 		.version(packageJson.version)
-		.description(
-			"Web data for AI agents. Call any Stophy endpoint from the terminal.",
-		)
+		.description("Web data for AI agents, from the terminal.")
 		.showHelpAfterError()
 		.addHelpText(
 			"after",
 			`
---refresh reloads the endpoint catalog.
+Run stophy <source> --help to see what it can do.
 
 Examples:
-  $ stophy endpoints youtube
-  $ stophy describe youtube.search
-  $ stophy youtube search --query "bun runtime" --limit 5
-  $ stophy maps search --query dentist --near Berlin --country DE
+  $ stophy youtube search "bun runtime" --limit 5
+  $ stophy maps search dentist --near Berlin --country de
+  $ stophy reddit subreddit rust
 `,
 		)
 		.action(() => {
@@ -75,7 +72,7 @@ Examples:
 	registerAccountCommands(program);
 	registerEndpointsCommand(program, endpoints);
 	registerDescribeCommand(program, endpoints);
-	registerDynamicCommands(program, endpoints);
+	registerDynamicCommands(program, endpoints, undefined, sources);
 	registerUsageCommand(program);
 	registerLogsCommand(program);
 	registerStatusCommand(program);
@@ -109,7 +106,7 @@ async function main() {
 	const { args, refresh } = stripGlobalRefresh(process.argv.slice(2));
 	setCurrentArgs(args);
 
-	let endpoints: readonly CatalogEndpoint[] = [];
+	let catalog: Catalog = { endpoints: [], sources: [] };
 	let background: Promise<void> | undefined;
 	if (catalogNeeded(args)) {
 		try {
@@ -122,7 +119,7 @@ async function main() {
 					process.stderr.write(`${message}\n`);
 				},
 			});
-			endpoints = loaded.endpoints;
+			catalog = { endpoints: loaded.endpoints, sources: loaded.sources };
 			background = loaded.background;
 		} catch (error) {
 			if (!catalogOptional(args)) throw error;
@@ -134,7 +131,7 @@ async function main() {
 		}
 	}
 
-	const program = buildProgram(endpoints);
+	const program = buildProgram(catalog);
 	try {
 		await program.parseAsync(args, { from: "user" });
 	} finally {

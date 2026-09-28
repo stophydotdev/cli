@@ -179,15 +179,43 @@ test("accepts number enums from anyOf const", () => {
 	})).toMatchObject({ ok: false, message: "--rankUpTo must be one of: 100, 200." });
 });
 
-test("help lists fields, enums, required markers, and cost", () => {
-	const help = formatEndpointHelp(search);
-	expect(help).toContain("Costs 1 credit per 20 items, free without an API key, cached 3600s.");
-	expect(help).toContain("--query <string>  required. 1-400 characters.");
-	expect(help).toContain("one of videos, all, channels, playlists, shorts. default videos.");
-	expect(help).toContain("--limit <integer>  1-100. default 20.");
+test("help reads like a person wrote it: summary, positional input, options, example", () => {
+	const help = formatEndpointHelp({
+		...search,
+		summary: "Search YouTube videos, channels, playlists and shorts",
+		example: { query: "bun runtime", limit: 5 },
+	});
+	expect(help).toContain("Usage: stophy youtube search <query> [options]");
+	expect(help).toContain("Search YouTube videos, channels, playlists and shorts.");
+	expect(help).toMatch(/--type <type> +videos, all, channels, playlists or shorts \(default: videos\)/u);
+	expect(help).toMatch(/--features <list> +Comma-separated: live, hd, 4k/u);
+	expect(help).toMatch(/--limit <number> +Number of results \(default: 20, max: 100\)/u);
+	expect(help).toContain('stophy youtube search "bun runtime" --limit 5');
 	expect(help).toContain("--json");
-	expect(formatDescribe(search)).toContain("POST /v1/youtube/search");
-	expect(formatDescribe(search)).toContain('"query"');
+	for (const internal of ["youtube.search", "credit", "cached", "3600", "characters", "--raw", "endpoint"]) {
+		expect(help).not.toContain(internal);
+	}
+	expect(formatDescribe(search)).toContain("youtube.search");
+	expect(formatDescribe(search)).toContain("Cost: 1 credit per 20 items.");
+});
+
+test("the one required text field can be given without its flag", () => {
+	expect(parseCall(["bun runtime", "--limit", "5"], search.input)).toMatchObject({
+		ok: true,
+		call: { body: { query: "bun runtime", limit: 5 } },
+	});
+	expect(parseCall(["--query", "bun"], search.input)).toMatchObject({
+		ok: true,
+		call: { body: { query: "bun" } },
+	});
+	expect(parseCall(["bun", "--query", "deno"], search.input)).toMatchObject({
+		ok: false,
+		message: "Flag --query was given twice.",
+	});
+	expect(parseCall(["bun", "extra"], search.input)).toMatchObject({
+		ok: false,
+		message: "Unexpected argument `extra`.",
+	});
 });
 
 test("endpoint index filters and marks keyless calls free", () => {

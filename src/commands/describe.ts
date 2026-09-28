@@ -11,7 +11,7 @@ export function registerDescribeCommand(
 	const byId = new Map(endpoints.map((endpoint) => [endpoint.id, endpoint]));
 	program
 		.command("describe")
-		.description("Show an endpoint's input schema, cost, and path")
+		.description("Show a command's options, cost and an example")
 		.argument("<id>", "Endpoint id, for example youtube.search")
 		.addHelpText(
 			"after",

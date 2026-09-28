@@ -15,16 +15,18 @@ export async function runEndpoint(endpoint: CatalogEndpoint): Promise<void> {
 	);
 	if (!parsed.ok) throw new CliError(parsed.message);
 
-	const response = await withSpinner(`Calling ${endpoint.id}…`, () =>
-		request({
-			method: "POST",
-			path: endpoint.path,
-			body: parsed.call.body,
-			accept:
-				parsed.call.format === "markdown"
-					? "text/markdown"
-					: "application/json",
-		}),
+	const response = await withSpinner(
+		`Calling ${endpoint.id.split(".").join(" ")}…`,
+		() =>
+			request({
+				method: "POST",
+				path: endpoint.path,
+				body: parsed.call.body,
+				accept:
+					parsed.call.format === "markdown"
+						? "text/markdown"
+						: "application/json",
+			}),
 	);
 
 	if (parsed.call.format === "markdown") {

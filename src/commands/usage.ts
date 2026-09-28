@@ -8,9 +8,7 @@ import type { OutputOptions } from "../types/api.js";
 export function registerUsageCommand(program: Command) {
 	program
 		.command("usage")
-		.description(
-			"Show your account balance, and credits used and requests made across all time",
-		)
+		.description("Show your balance and all-time usage")
 		.option("--json", "Print raw JSON")
 		.option("-o, --output <file>", "Write output to a file")
 		.addHelpText(

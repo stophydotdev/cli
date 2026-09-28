@@ -16,7 +16,8 @@ const failureSchema = z.union([
 ]);
 
 export interface RequestOptions {
-	readonly method: "GET" | "POST";
+	readonly method: "GET" | "POST" | "DELETE";
+	readonly apiKey?: string;
 	readonly path: string;
 	readonly body?: Record<string, unknown>;
 	readonly params?: Record<string, string | undefined>;
@@ -38,7 +39,9 @@ export interface HttpResponse {
 
 /** The only HTTP path. Throws `CliError` on network failure and non-2xx responses. */
 export async function request(options: RequestOptions): Promise<HttpResponse> {
-	const { apiKey, baseUrl, sessionCookie } = await resolveRuntimeConfig();
+	const runtime = await resolveRuntimeConfig();
+	const { baseUrl, sessionCookie } = runtime;
+	const apiKey = options.apiKey ?? runtime.apiKey;
 	const url = new URL(options.path, `${baseUrl}/`);
 	for (const [key, value] of Object.entries(options.params ?? {})) {
 		if (value) url.searchParams.set(key, value);

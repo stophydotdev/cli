@@ -1,5 +1,5 @@
 import type { Command } from "commander";
-import type { CatalogEndpoint } from "../catalog.js";
+import type { CatalogEndpoint, CatalogSource } from "../catalog.js";
 import { CliError } from "../errors.js";
 import { formatEndpointHelp } from "../flags.js";
 import { runEndpoint } from "../invoke.js";
@@ -29,10 +29,24 @@ export function registerDynamicCommands(
 	program: Command,
 	endpoints: readonly CatalogEndpoint[],
 	run: (endpoint: CatalogEndpoint) => Promise<void> = runEndpoint,
+	sources: readonly CatalogSource[] = [],
 ): void {
+	const summaries = new Map(
+		sources.map((source) => [source.id, source.summary]),
+	);
 	for (const [name, node] of tree(endpoints)) {
-		registerNode(program, name, node, run);
+		registerNode(
+			program,
+			name,
+			node,
+			run,
+			summaries.get(name) ?? sourceLabel(name),
+		);
 	}
+}
+
+export function sourceLabel(name: string): string {
+	return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 /** Dot-id of the command being run, such as `youtube.comments.replies`. */
@@ -77,24 +91,55 @@ function registerNode(
 	name: string,
 	node: TreeNode,
 	run: (endpoint: CatalogEndpoint) => Promise<void>,
+	label: string,
 ): void {
 	const command = parent.command(name);
 	const endpoint = node.endpoint;
 	if (endpoint) {
 		command
-			.description(endpoint.id)
+			.description(endpoint.summary ?? label)
 			.allowUnknownOption(true)
 			.allowExcessArguments(true)
-			.addHelpText("after", formatEndpointHelp(endpoint))
 			.action(async () => {
 				await run(endpoint);
 			});
+		command.helpInformation = () =>
+			[formatEndpointHelp(endpoint), ...childLines(node, label)].join("\n");
 	} else {
-		command.description(`${name} endpoints`).action(() => {
+		command.description(label).action(() => {
 			command.outputHelp();
 		});
 	}
 	for (const [childName, child] of node.children) {
-		registerNode(command, childName, child, run);
+		registerNode(
+			command,
+			childName,
+			child,
+			run,
+			firstSummary(child) ?? sourceLabel(childName),
+		);
 	}
+}
+
+function firstSummary(node: TreeNode): string | undefined {
+	if (node.endpoint?.summary) return node.endpoint.summary;
+	for (const child of node.children.values()) {
+		const found = firstSummary(child);
+		if (found) return found;
+	}
+	return undefined;
+}
+
+function childLines(node: TreeNode, label: string): string[] {
+	const rows = [...node.children].map(([name, child]) => [
+		name,
+		firstSummary(child) ?? label,
+	]);
+	if (rows.length === 0) return [];
+	const width = Math.max(...rows.map(([name]) => (name ?? "").length)) + 2;
+	return [
+		"Commands:",
+		...rows.map(([name, text]) => `  ${(name ?? "").padEnd(width)}${text}`),
+		"",
+	];
 }

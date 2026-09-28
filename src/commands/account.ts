@@ -1,11 +1,14 @@
 import type { Command } from "commander";
+import { request } from "../client.js";
 import { green } from "../color.js";
 import {
 	clearStoredAuth,
 	getConfigPath,
 	loadConfig,
+	normalizeApiKey,
 	resolveRuntimeConfig,
 } from "../config.js";
+import { CliError, statusFrom } from "../errors.js";
 
 function maskSecret(value?: string) {
 	if (!value) {
@@ -77,9 +80,41 @@ export function registerAccountCommands(program: Command) {
 
 	program
 		.command("logout")
-		.description("Clear saved credentials")
+		.description("Log out and revoke this machine's key")
 		.action(async () => {
-			await clearStoredAuth();
-			process.stderr.write(green("Cleared saved Stophy credentials.\n"));
+			process.stderr.write(await logout(revokeKey));
 		});
+}
+
+async function revokeKey(apiKey: string): Promise<void> {
+	await request({
+		method: "DELETE",
+		path: "/v1/key",
+		accept: "application/json",
+		apiKey,
+	});
+}
+
+export async function logout(
+	revoke: (apiKey: string) => Promise<void>,
+): Promise<string> {
+	const stored = normalizeApiKey((await loadConfig()).apiKey);
+	let note = "";
+	if (stored) {
+		try {
+			await revoke(stored);
+		} catch (error) {
+			const reason =
+				error instanceof CliError && statusFrom(error) !== undefined
+					? "the server did not accept it, it may already be revoked"
+					: "the server could not be reached";
+			note = ` The key was not revoked (${reason}); you can revoke it at stophy.dev.`;
+		}
+	}
+	await clearStoredAuth();
+	const env = process.env.STOPHY_API_KEY
+		? " STOPHY_API_KEY is still set in your environment."
+		: "";
+	const done = stored ? "Logged out." : "No saved key. Logged out.";
+	return `${green(done)}${note}${env}\n`;
 }

@@ -34,7 +34,7 @@ test("uses a fresh cache, refreshes a stale one, and keeps it when refresh fails
 		force: false,
 		fetch: async () => {
 			fetches += 1;
-			return [endpoint];
+			return { endpoints: [endpoint], sources: [] };
 		},
 		warn: () => {},
 	});
@@ -49,7 +49,7 @@ test("uses a fresh cache, refreshes a stale one, and keeps it when refresh fails
 		force: false,
 		fetch: async () => {
 			fetches += 1;
-			return [newer];
+			return { endpoints: [newer], sources: [] };
 		},
 		warn: () => {},
 	});
