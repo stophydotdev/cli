@@ -55,7 +55,7 @@ Examples:
 			printLogTable(parsed.data.logs);
 			const pages = parsed.data.totalPages === 0 ? 1 : parsed.data.totalPages;
 			process.stderr.write(
-				`page ${parsed.data.page + 1} of ${pages} (${parsed.data.total} requests)\n`,
+				`page ${parsed.data.page + 1} of ${pages} (${parsed.data.total} requests in the last ${days} ${days === 1 ? "day" : "days"})\n`,
 			);
 		});
 }

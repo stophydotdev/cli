@@ -41,9 +41,8 @@ export type LogsData = z.infer<typeof logsDataSchema>;
 export type LogEntry = z.infer<typeof logEntrySchema>;
 
 export function creditsFromMicros(micros: number): number | undefined {
-	if (!Number.isFinite(micros) || micros % MICROS_PER_CREDIT !== 0)
-		return undefined;
-	return micros / MICROS_PER_CREDIT;
+	if (!Number.isFinite(micros)) return undefined;
+	return Math.floor(micros / MICROS_PER_CREDIT);
 }
 
 export function formatBalance(micros: number): string {

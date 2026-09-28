@@ -26,7 +26,7 @@ import { registerStatusCommand } from "./commands/status.js";
 import { registerUsageCommand } from "./commands/usage.js";
 import { registerVersionCommand } from "./commands/version.js";
 import { resolveRuntimeConfig } from "./config.js";
-import { toCliError } from "./errors.js";
+import { CliError, toCliError } from "./errors.js";
 import { promptLogin } from "./prompt-login.js";
 import { maybeShowUpdateNotice } from "./update-notice.js";
 
@@ -89,7 +89,13 @@ Examples:
 		if (!endpoint && actionCommand.commands.length > 0) return;
 		if (!endpoint && NO_AUTH_COMMANDS.has(actionCommand.name())) return;
 		const { apiKey, sessionCookie } = await resolveRuntimeConfig();
-		if (!(apiKey || sessionCookie)) await promptLogin();
+		if (apiKey || sessionCookie) return;
+		if (!process.stdin.isTTY) {
+			throw new CliError(
+				"No API key. Set STOPHY_API_KEY or run `stophy login`.",
+			);
+		}
+		await promptLogin();
 	});
 
 	program.configureOutput({

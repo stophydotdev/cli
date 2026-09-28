@@ -37,7 +37,7 @@
     "dev": "tsc --watch",
     "check": "biome check ./src",
     "check-types": "tsc --noEmit",
-    "test": "bun test ./tests/flags.test.ts ./tests/catalog.test.ts ./tests/commands.test.ts",
+    "test": "bun test ./tests/account.test.ts ./tests/flags.test.ts ./tests/catalog.test.ts ./tests/commands.test.ts",
     "test:init": "npm run build && node --test tests/init.test.mjs",
     "changeset": "changeset",
     "version": "changeset version",

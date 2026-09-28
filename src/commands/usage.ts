@@ -9,7 +9,7 @@ export function registerUsageCommand(program: Command) {
 	program
 		.command("usage")
 		.description(
-			"Show the balance, credits used, and request count for your API key",
+			"Show your account balance, and credits used and requests made across all time",
 		)
 		.option("--json", "Print raw JSON")
 		.option("-o, --output <file>", "Write output to a file")
@@ -37,8 +37,8 @@ Examples:
 			writeOutput(
 				[
 					`balance: ${formatBalance(parsed.data.balanceMicros)}`,
-					`credits used: ${parsed.data.creditsUsed}`,
-					`requests: ${parsed.data.requestCount}`,
+					`credits used (all time): ${parsed.data.creditsUsed}`,
+					`requests (all time): ${parsed.data.requestCount}`,
 				].join("\n"),
 			);
 		});
