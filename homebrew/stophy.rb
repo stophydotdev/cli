@@ -1,5 +1,5 @@
 class Stophy < Formula
-  desc "Stophy CLI - web data for AI agents and developers"
+  desc "Public web data from your terminal"
   homepage "https://stophy.dev"
   version "1.0.8"
   license "MIT"

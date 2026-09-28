@@ -1,5 +1,5 @@
 name: stophy
-description: Stophy CLI - web data for AI agents and developers
+description: "Public web data from your terminal: search, video, social, places, shopping, jobs and real estate."
 homepage: https://stophy.dev
 maintainer: Stophy <support@stophy.dev>
 license: MIT

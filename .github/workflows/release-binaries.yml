@@ -164,12 +164,13 @@ jobs:
       - name: Generate release notes
         if: needs.check-version.outputs.dry_run != 'true'
         run: |
-          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -n "$PREV_TAG" ]; then
-            git log --pretty=format:"- %s" "$PREV_TAG..HEAD" -- | head -50 > /tmp/release-notes.md
-          else
-            echo "Initial release" > /tmp/release-notes.md
+          VERSION="${{ needs.check-version.outputs.version }}"
+          awk -v v="## $VERSION" '$0 == v {found=1; next} found && /^## / {exit} found' CHANGELOG.md \
+            | sed -E 's/^- [0-9a-f]{7}: /- /' > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "See CHANGELOG.md for $VERSION." > /tmp/release-notes.md
           fi
+          cat /tmp/release-notes.md
 
       - name: Create tag and GitHub release
         if: needs.check-version.outputs.dry_run != 'true'
