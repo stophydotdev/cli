@@ -1,10 +1,10 @@
-# @stophy/cli
+# Stophy CLI
 
-Web data for AI agents. The CLI reads the live Stophy catalog and calls `POST /v1/<source>/<endpoint>` from the terminal. Output is markdown by default.
+Get public web data from your terminal: search results, videos, social posts, places, products, jobs, homes, and more. Results print as markdown, or as JSON with `--json`.
 
-## Quick start
+## Get started
 
-Install the CLI globally, add every Stophy skill to all supported AI agents, and authenticate in your browser:
+Run one command to install the CLI, add the Stophy skills to your AI agents, and log in:
 
 ```bash
 npx -y @stophy/cli@latest init --all --browser
@@ -12,100 +12,100 @@ npx -y @stophy/cli@latest init --all --browser
 
 ## Install
 
+Install with npm. You need Node.js 20 or later.
+
 ```bash
 npm install -g @stophy/cli
 ```
 
-Or install a standalone binary (no Node.js required):
+To install without Node.js, use the standalone binary:
 
 ```bash
-# macOS / Linux
+# macOS and Linux
 curl -fsSL https://stophy.dev/install.sh | bash
 
 # Windows (PowerShell)
 irm https://stophy.dev/install.ps1 | iex
-
-# Homebrew
-brew install stophydotdev/tap/stophy
 ```
 
-The npm package requires Node.js 20 or later. Get an API key at [stophy.dev](https://stophy.dev/dashboard).
-
-## Auth
+## Log in
 
 ```bash
-stophy login --browser           # opens browser
-stophy login --api-key st_xxx    # paste key directly
-export STOPHY_API_KEY="st_..."   # env var also works
+stophy login --browser
 ```
 
-`STOPHY_BASE_URL` overrides the API origin (default `https://api.stophy.dev`).
+The CLI prints a code and opens stophy.dev. Check that the page shows the same code, then click **Approve**.
 
-## Calls
+On a server with no browser, open the printed link on any other device. The server logs in when you approve.
 
-Endpoint ids map to words. `youtube.search` is `stophy youtube search`. `youtube.comments.replies` is `stophy youtube comments replies`.
+To use an API key instead, get one from the [dashboard](https://stophy.dev/dashboard) and pass it in one of two ways:
 
 ```bash
-stophy youtube search --query "bun runtime" --limit 5
-stophy maps search --query dentist --near Berlin --country DE
-stophy youtube search --help
+stophy login --api-key st_...
+export STOPHY_API_KEY="st_..."
 ```
 
-`--help` lists each field, its type, whether it is required, enum values, and the credit cost. Flags come from the endpoint's JSON schema:
+Each computer gets its own key. Logging in again on the same computer replaces its key. To log out and revoke the key, run `stophy logout`.
 
-- strings, numbers, and integers are validated before the call
-- booleans take `--flag` and `--no-flag`
-- enums are checked against the allowed values
-- arrays repeat (`--features live --features hd`) or take a comma list (`--features live,hd`)
-- unknown flags error and list the valid ones
+## Get data
 
-Markdown is the default (`Accept: text/markdown`). `--json` prints the `data` object and writes `credits used` to stderr. `--raw` prints the full JSON envelope.
-
-## Discovery
+Name the source, then the command:
 
 ```bash
-stophy endpoints youtube
-stophy describe youtube.search
-stophy --refresh endpoints
+stophy youtube search "bun runtime" --limit 5
+stophy maps search dentist --near Berlin --country de
+stophy reddit subreddit rust
 ```
 
-`endpoints` prints credits and marks keyless endpoints as `free`. The catalog is cached for 5 minutes. A stale cache refreshes in the background. If the network is down, the CLI uses the cache and says so. `--refresh` forces a reload.
+To see what a source can do, run `stophy <source> --help`. To see every option for a command, run `stophy <source> <command> --help`.
 
-## Account
+Options work like this:
+
+- Give an option once, or give a list as `--features live,hd` or `--features live --features hd`.
+- Turn a yes-or-no option on with `--flag` and off with `--no-flag`.
+- If you give a value the command does not accept, the CLI stops before it calls Stophy and says which values work.
+
+To change the output:
+
+- `--json` prints the data as JSON and prints the credits used to stderr.
+- `-o <path>` writes the output to a file.
+
+When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
+
+`web search`, `youtube search`, and `youtube transcript` work without logging in.
+
+## Check your account
 
 ```bash
+stophy status
 stophy usage
-stophy logs --days 7 --endpoint youtube.search
+stophy logs --days 7
 ```
 
-`usage` and `logs` call `GET /v1/usage` and `GET /v1/logs` with your API key. There is no `credits` command: `GET /credits` requires a browser session, and `stophy login` stores an API key. The balance is included in `stophy usage` and `stophy status`.
+`status` shows your login and balance. `usage` shows your balance and your all-time usage. `logs` shows your recent requests.
 
-## All commands
+## Commands
 
 | Command | What it does |
-|---------|-------------|
-| `stophy init --all --browser` | Install the CLI, all agent skills, and authenticate |
-| `stophy login` | Authenticate with API key or browser |
-| `stophy endpoints [term]` | List catalog endpoints, credits, and free keyless calls |
-| `stophy describe <id>` | Show one endpoint's input schema and cost |
-| `stophy <source> <endpoint>` | Call that endpoint |
-| `stophy usage` | Balance, credits used, and request count |
-| `stophy logs` | Request logs for your API key |
-| `stophy status` | Version, auth status, and balance |
-| `stophy doctor` | Diagnose install, auth, and API connectivity |
-| `stophy version` | CLI version and auth status |
-| `stophy view-config` | Config and auth status |
-| `stophy logout` | Clear saved credentials |
+| --- | --- |
+| `stophy init --all --browser` | Install the CLI and the agent skills, and log in |
+| `stophy login` | Log in with your browser or an API key |
+| `stophy logout` | Log out and revoke this computer's key |
+| `stophy <source> <command>` | Get data, for example `stophy youtube search` |
+| `stophy endpoints [word]` | List every command and its cost |
+| `stophy status` | Show your login, balance, and CLI version |
+| `stophy usage` | Show your balance and all-time usage |
+| `stophy logs` | Show your recent requests |
+| `stophy doctor` | Check your install, login, and connection |
+| `stophy version` | Show the CLI version |
 
-The CLI checks npm for a newer version in the background and prints a one-line notice when an update is available. Set `STOPHY_NO_UPDATE_CHECK=1` to disable it.
+The CLI tells you when a newer version is available. To turn off the check, set `STOPHY_NO_UPDATE_CHECK=1`.
 
-Each command supports `--help`. Full docs at [docs.stophy.dev](https://docs.stophy.dev).
+## More
 
-## Also see
-
-- [@stophy/mcp](https://www.npmjs.com/package/@stophy/mcp) — MCP server for AI agents
-- [stophydotdev/skills](https://github.com/stophydotdev/skills) — agent skills for the CLI (`npx skills add stophydotdev/skills`)
-- [stophy.dev](https://stophy.dev) — dashboard and API keys
+- [Stophy docs](https://docs.stophy.dev)
+- [Agent skills for the CLI](https://github.com/stophydotdev/skills): `npx skills add stophydotdev/skills`
+- [Dashboard and API keys](https://stophy.dev/dashboard)
 
 ## License
 
