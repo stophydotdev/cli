@@ -61,14 +61,14 @@ export async function doBrowserLogin(options?: { promptBeforeOpen?: boolean }) {
 		baseUrl,
 		frontendUrl,
 	});
-	err(green("Stophy CLI authorized. Saved API key."));
+	err(green("✓ Login successful!"));
 }
 
 async function doApiKeyLogin() {
 	const value = await prompt("Paste your Stophy API key: ");
 	const apiKey = validateApiKey(value);
 	await setStoredApiKey(apiKey);
-	err(green("Saved API key."));
+	err(green("✓ Login successful!"));
 }
 
 export async function promptLogin() {

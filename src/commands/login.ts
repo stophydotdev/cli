@@ -47,7 +47,7 @@ async function handleApiKeyLogin(apiKeyOption?: boolean | string) {
 			? validateApiKey(apiKeyOption)
 			: validateApiKey(await prompt("Paste your Stophy API key: "));
 	await setStoredApiKey(apiKey);
-	err(green("Saved API key."));
+	err(green("✓ Login successful!"));
 }
 
 export function registerLoginCommand(program: Command) {
