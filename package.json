@@ -1,7 +1,7 @@
 {
   "name": "@stophy/cli",
   "version": "1.1.0",
-  "description": "YouTube context for AI agents. Search, transcripts, comments, channels, and playlists — structured JSON from the terminal.",
+  "description": "Web data for AI agents. Call the Stophy API from the terminal.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -21,22 +21,14 @@
   },
   "keywords": [
     "stophy",
-    "youtube",
-    "youtube-data",
-    "youtube-api",
-    "youtube-transcript",
-    "youtube-comments",
-    "youtube-channel",
-    "youtube-playlist",
-    "youtube-search",
-    "youtube-cli",
+    "web-data",
+    "data-api",
+    "cli",
     "ai-agent",
     "ai-agents",
-    "youtube-for-ai",
     "llm",
-    "mcp",
-    "transcript",
-    "search"
+    "search",
+    "api"
   ],
   "scripts": {
     "build": "tsc",
@@ -45,6 +37,7 @@
     "dev": "tsc --watch",
     "check": "biome check ./src",
     "check-types": "tsc --noEmit",
+    "test": "bun test ./tests/account.test.ts ./tests/login.test.ts ./tests/flags.test.ts ./tests/catalog.test.ts ./tests/commands.test.ts",
     "test:init": "npm run build && node --test tests/init.test.mjs",
     "changeset": "changeset",
     "version": "changeset version",
@@ -60,7 +53,8 @@
     "open": "^11.0.0",
     "ora": "^9.4.1",
     "prompts": "^2.4.2",
-    "update-notifier": "^7.3.1"
+    "update-notifier": "^7.3.1",
+    "zod": "^4.6.5"
   },
   "engines": {
     "node": ">=20"

@@ -11,6 +11,7 @@ import {
 	setStoredApiKey,
 	validateApiKey,
 } from "./config.js";
+import { loginCode } from "./login-code.js";
 
 const err = (msg: string) => process.stderr.write(`${msg}\n`);
 
@@ -41,6 +42,8 @@ export async function doBrowserLogin(options?: { promptBeforeOpen?: boolean }) {
 	err("");
 	err(green(loginUrl));
 	err("");
+	err(`Your code: ${loginCode(codeChallenge)}`);
+	err("");
 	if (options?.promptBeforeOpen !== false) {
 		await prompt("Press Enter to open your browser...");
 	}
@@ -58,19 +61,19 @@ export async function doBrowserLogin(options?: { promptBeforeOpen?: boolean }) {
 		baseUrl,
 		frontendUrl,
 	});
-	err(green("Stophy CLI authorized. Saved API key."));
+	err(green("✓ Login successful!"));
 }
 
 async function doApiKeyLogin() {
 	const value = await prompt("Paste your Stophy API key: ");
 	const apiKey = validateApiKey(value);
 	await setStoredApiKey(apiKey);
-	err(green("Saved API key."));
+	err(green("✓ Login successful!"));
 }
 
 export async function promptLogin() {
-	err(`  📺 @stophy/cli v${packageJson.version}`);
-	err("  Search YouTube, get transcripts, read comments, and inspect channels");
+	err(`  @stophy/cli v${packageJson.version}`);
+	err("  Web data for AI agents");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");
