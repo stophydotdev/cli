@@ -1,7 +1,7 @@
 {
   "name": "@stophy/cli",
   "version": "1.1.0",
-  "description": "Web data for AI agents. Call the Stophy API from the terminal.",
+  "description": "Public web data from your terminal: search, video, social, places, shopping, jobs and real estate.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -21,14 +21,16 @@
   },
   "keywords": [
     "stophy",
-    "web-data",
-    "data-api",
     "cli",
-    "ai-agent",
+    "web-data",
+    "web-search",
+    "scraping",
     "ai-agents",
     "llm",
-    "search",
-    "api"
+    "youtube",
+    "reddit",
+    "maps",
+    "mcp"
   ],
   "scripts": {
     "build": "tsc",
