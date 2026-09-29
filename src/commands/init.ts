@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { access } from "node:fs/promises";
 import { delimiter, join } from "node:path";
-import type { Command } from "commander";
+import { type Command, Option } from "commander";
 import prompts from "prompts";
 import { green } from "../color.js";
 import { resolveRuntimeConfig } from "../config.js";
@@ -252,6 +252,7 @@ export function registerInitCommand(program: Command) {
 		.option("--skip-auth", "Do not log in")
 		.option("--skip-skills", "Do not install the skills")
 		.option("--skip-mcp", "Do not add the MCP server")
+		.addOption(new Option("--browser").hideHelp())
 		.addHelpText("after", "\nExample:\n  npx -y @stophy/cli init --all\n")
 		.action(async (options: InitOptions) => {
 			await runInit(options);
