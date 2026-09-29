@@ -1,6 +1,6 @@
 {
   "name": "@stophy/cli",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Live data from 40+ sites in your terminal: web search, YouTube, Reddit, Google Maps, Amazon, jobs, real estate, ads, stocks and crypto.",
   "license": "MIT",
   "type": "module",
