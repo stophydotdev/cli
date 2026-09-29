@@ -1,7 +1,7 @@
 {
   "name": "@stophy/cli",
   "version": "2.0.0",
-  "description": "Public web data from your terminal: search, video, social, places, shopping, jobs and real estate.",
+  "description": "Live data from 40+ sites in your terminal: web search, YouTube, Reddit, Google Maps, Amazon, jobs, real estate, ads, stocks and crypto.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -30,7 +30,12 @@
     "youtube",
     "reddit",
     "maps",
-    "mcp"
+    "mcp",
+    "google-maps",
+    "transcripts",
+    "ads",
+    "finance",
+    "crypto"
   ],
   "scripts": {
     "build": "tsc",
@@ -39,8 +44,7 @@
     "dev": "tsc --watch",
     "check": "biome check ./src",
     "check-types": "tsc --noEmit",
-    "test": "bun test ./tests/account.test.ts ./tests/login.test.ts ./tests/flags.test.ts ./tests/catalog.test.ts ./tests/commands.test.ts",
-    "test:init": "npm run build && node --test tests/init.test.mjs",
+    "test": "bun test ./tests/account.test.ts ./tests/login.test.ts ./tests/flags.test.ts ./tests/catalog.test.ts ./tests/commands.test.ts ./tests/init.test.ts",
     "changeset": "changeset",
     "version": "changeset version",
     "build:binary": "bash scripts/build-binaries.sh",

@@ -192,7 +192,8 @@ test("help reads like a person wrote it: summary, positional input, options, exa
 	expect(help).toMatch(/--limit <number> +Number of results \(default: 20, max: 100\)/u);
 	expect(help).toContain('stophy youtube search "bun runtime" --limit 5');
 	expect(help).toContain("--json");
-	for (const internal of ["youtube.search", "credit", "cached", "3600", "characters", "--raw", "endpoint"]) {
+	expect(help).toMatch(/--raw +Output the full response with its request id/u);
+	for (const internal of ["youtube.search", "credit", "cached", "3600", "characters", "endpoint"]) {
 		expect(help).not.toContain(internal);
 	}
 	expect(formatDescribe(search)).toContain("youtube.search");

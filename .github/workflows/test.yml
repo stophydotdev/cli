@@ -31,9 +31,6 @@ jobs:
       - name: Test
         run: bun run test
 
-      - name: Test init onboarding
-        run: node --test tests/init.test.mjs
-
       - name: Test installer upgrades
         run: bash tests/install.sh
 

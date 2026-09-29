@@ -74,7 +74,10 @@ export async function request(options: RequestOptions): Promise<HttpResponse> {
 	const json = parseJsonBody(text, response.headers.get("content-type"));
 	const retryAfter = response.headers.get("Retry-After");
 	if (!response.ok) {
-		throw new CliError(failureMessage(json, response.status, retryAfter), 1, {
+		const requestId =
+			response.headers.get("X-Request-ID") ?? requestIdFrom(json);
+		const message = failureMessage(json, response.status, retryAfter);
+		throw new CliError(withRequestId(message, requestId), 1, {
 			status: response.status,
 			...(retryAfter ? { retryAfter } : {}),
 		});
@@ -110,6 +113,20 @@ function parseJsonBody(text: string, contentType: string | null): unknown {
 
 function parseJson(text: string): unknown {
 	return JSON.parse(text);
+}
+
+function requestIdFrom(body: unknown): string | null {
+	const parsed = failureSchema.safeParse(body);
+	if (!parsed.success || typeof parsed.data.error === "string") return null;
+	return parsed.data.error.requestId ?? null;
+}
+
+/** Every API error ends with the request id, so a report can point at the exact call. */
+export function withRequestId(
+	message: string,
+	requestId: string | null,
+): string {
+	return requestId === null ? message : `${message}\nRequest id: ${requestId}`;
 }
 
 function failureMessage(
