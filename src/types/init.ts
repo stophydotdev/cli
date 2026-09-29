@@ -1,4 +1,7 @@
 export interface InitOptions {
 	all?: boolean;
-	browser?: boolean;
+	agent?: string;
+	skipAuth?: boolean;
+	skipSkills?: boolean;
+	skipMcp?: boolean;
 }

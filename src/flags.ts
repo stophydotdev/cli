@@ -913,6 +913,7 @@ export function formatEndpointHelp(endpoint: CatalogEndpoint): string {
 			.filter((slot) => slot !== positional)
 			.map((slot): [string, string] => [optionName(slot), optionText(slot)]),
 		["--json", "Output as JSON"],
+		["--raw", "Output the full response with its request id"],
 		["-o, --output <path>", "Write to a file"],
 	];
 	return [

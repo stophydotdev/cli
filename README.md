@@ -1,14 +1,30 @@
 # Stophy CLI
 
-Get public web data from your terminal: search results, videos, social posts, places, products, jobs, homes, and more. Results print as markdown, or as JSON with `--json`.
+Live data from 40+ sites in your terminal: web search, YouTube, Reddit, Google Maps, Amazon, jobs, real estate, ads, stocks and crypto. Results print as markdown, or as JSON with `--json`.
 
 ## Get started
 
-Run one command to install the CLI, add the Stophy skills to your AI agents, and log in:
+Run one command to log in, add the Stophy skills to your AI agents, and add the Stophy MCP server:
 
 ```bash
-npx -y @stophy/cli@latest init --all --browser
+npx -y @stophy/cli init --all
 ```
+
+`init` runs three steps in order:
+
+1. Logs you in with your browser, unless you are already logged in.
+2. Installs the Stophy skills with `npx -y skills add stophydotdev/skills`.
+3. Adds the MCP server. With Claude Code on your PATH it runs `claude mcp add`. For any other agent it prints the exact command or snippet to use, and does not edit your config files.
+
+| Option | What it does |
+| --- | --- |
+| `--all` | Run every step without asking |
+| `--agent <name>` | Set up one agent, such as `claude-code` or `codex` |
+| `--skip-auth` | Do not log in |
+| `--skip-skills` | Do not install the skills |
+| `--skip-mcp` | Do not add the MCP server |
+
+When it finishes, `init` prints a summary and a first command to try. To run `stophy ...` commands directly, install the CLI as described below.
 
 ## Install
 
@@ -68,11 +84,14 @@ Options work like this:
 To change the output:
 
 - `--json` prints the data as JSON and prints the credits used to stderr.
+- `--raw` prints the full response, including its request id.
 - `-o <path>` writes the output to a file.
 
 When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
 
 `web search`, `youtube search`, and `youtube transcript` work without logging in.
+
+When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 
 ## Check your account
 
@@ -88,7 +107,7 @@ stophy logs --days 7
 
 | Command | What it does |
 | --- | --- |
-| `stophy init --all --browser` | Install the CLI and the agent skills, and log in |
+| `stophy init` | Log in, install the agent skills, and add the MCP server |
 | `stophy login` | Log in with your browser or an API key |
 | `stophy logout` | Log out and revoke this computer's key |
 | `stophy <source> <command>` | Get data, for example `stophy youtube search` |
