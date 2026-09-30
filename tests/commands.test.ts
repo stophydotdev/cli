@@ -20,8 +20,6 @@ test("nested catalog commands reach the matching endpoint", async () => {
 				path: "/v1/youtube/search",
 				credits: 1,
 				keyless: true,
-				perItems: 20,
-				cacheTtlSeconds: 60,
 				input: {
 					type: "object",
 					properties: { query: { type: "string", minLength: 1 } },
@@ -34,8 +32,6 @@ test("nested catalog commands reach the matching endpoint", async () => {
 				path: "/v1/youtube/comments",
 				credits: 1,
 				keyless: false,
-				perItems: null,
-				cacheTtlSeconds: 60,
 				input: {
 					type: "object",
 					properties: { video: { type: "string" } },
@@ -43,17 +39,15 @@ test("nested catalog commands reach the matching endpoint", async () => {
 				},
 			},
 			{
-				id: "youtube.comments.replies",
+				id: "transcript",
 				method: "POST",
-				path: "/v1/youtube/comments/replies",
-				credits: 1,
-				keyless: false,
-				perItems: 10,
-				cacheTtlSeconds: 60,
+				path: "/v1/transcript",
+				credits: 2,
+				keyless: true,
 				input: {
 					type: "object",
-					properties: { video: { type: "string" }, cursor: { type: "string" } },
-					required: ["video", "cursor"],
+					properties: { video: { type: "string" } },
+					required: ["video"],
 				},
 			},
 		],
@@ -78,10 +72,8 @@ test("nested catalog commands reach the matching endpoint", async () => {
 	expect(help.join("")).not.toContain("youtube.search");
 
 	await program.parseAsync(["youtube", "search", "--query", "bun"], { from: "user" });
-	await program.parseAsync(["youtube", "comments", "replies", "--video", "abc", "--cursor", "next"], {
-		from: "user",
-	});
-	expect(called).toEqual(["youtube.search", "youtube.comments.replies"]);
+	await program.parseAsync(["transcript", "https://youtu.be/M4TufsFlv_o"], { from: "user" });
+	expect(called).toEqual(["youtube.search", "transcript"]);
 });
 
 test("sources show their summary, or their name when the server has none", async () => {
@@ -93,8 +85,6 @@ test("sources show their summary, or their name when the server has none", async
 		path: "/v1/reddit/search",
 		credits: 2,
 		keyless: false,
-		perItems: null,
-		cacheTtlSeconds: 60,
 		input: { type: "object", properties: {} },
 	};
 	const withSummary = new Command();

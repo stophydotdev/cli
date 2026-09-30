@@ -9,13 +9,13 @@ const CATALOG_TTL_MS = 5 * 60 * 1000;
 
 export const endpointSchema = z.object({
 	id: z.string().min(1),
+	title: z.string().min(1).optional(),
 	summary: z.string().min(1).optional(),
+	bestWhen: z.string().min(1).nullish(),
 	method: z.literal("POST"),
 	path: z.string().min(1),
 	credits: z.number().int().nonnegative(),
 	keyless: z.boolean(),
-	perItems: z.number().int().positive().nullable(),
-	cacheTtlSeconds: z.number().int().nonnegative(),
 	input: z.record(z.string(), z.unknown()),
 	example: z.record(z.string(), z.unknown()).nullable().optional(),
 });

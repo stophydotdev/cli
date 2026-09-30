@@ -21,7 +21,7 @@ export interface RequestOptions {
 	readonly path: string;
 	readonly body?: Record<string, unknown>;
 	readonly params?: Record<string, string | undefined>;
-	readonly accept: "application/json" | "text/markdown";
+	readonly accept: "application/json";
 }
 
 export interface HttpResponse {

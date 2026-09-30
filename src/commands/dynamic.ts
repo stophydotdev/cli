@@ -49,7 +49,7 @@ export function sourceLabel(name: string): string {
 	return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-/** Dot-id of the command being run, such as `youtube.comments.replies`. */
+/** Dot-id of the command being run, such as `youtube.comments`. */
 export function commandPath(command: Command): string | undefined {
 	const names: string[] = [];
 	let current: Command | null = command;

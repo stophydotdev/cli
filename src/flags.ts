@@ -106,7 +106,7 @@ type Slot = ScalarSlot | ArraySlot | JsonSlot;
 
 export interface ParsedCall {
 	readonly body: Record<string, unknown>;
-	readonly format: "markdown" | "json" | "raw";
+	readonly format: "text" | "json" | "raw";
 	readonly outputFile?: string;
 }
 
@@ -443,7 +443,7 @@ export function parseCall(
 	const positional = positionalSlot(slots);
 	const body: Record<string, unknown> = {};
 	const setFlags = new Set<string>();
-	let format: ParsedCall["format"] = "markdown";
+	let format: ParsedCall["format"] = "text";
 	let outputFile: string | undefined;
 	let sawJson = false;
 	let sawRaw = false;
@@ -879,25 +879,29 @@ function valueAt(root: Record<string, unknown>, flag: string): unknown {
 	return current;
 }
 
-export function creditPhrase(credits: number, perItems: number | null): string {
-	const noun = credits === 1 ? "credit" : "credits";
-	if (perItems === null) return `${credits} ${noun}`;
-	return `${credits} ${noun} per ${perItems} items`;
+export function creditPhrase(credits: number): string {
+	return `${credits} ${credits === 1 ? "credit" : "credits"}`;
 }
 
-export function costLine(endpoint: {
-	readonly credits: number;
-	readonly perItems: number | null;
-}): string {
-	return `Cost: ${creditPhrase(endpoint.credits, endpoint.perItems)}.`;
+export function costLine(endpoint: { readonly credits: number }): string {
+	return `Cost: ${creditPhrase(endpoint.credits)} per call.`;
 }
 
 export function positionalSlot(slots: readonly Slot[]): StringSlot | undefined {
-	const required = slots.filter((slot) => slot.always);
-	const only = required[0];
-	if (required.length !== 1 || only === undefined) return undefined;
-	if (only.kind !== "string" || only.flag.includes(".")) return undefined;
-	return only;
+	const free = slots.filter(
+		(slot): slot is StringSlot =>
+			slot.always &&
+			slot.kind === "string" &&
+			!slot.enumValues &&
+			!slot.flag.includes("."),
+	);
+	const only = free[0];
+	if (free.length === 1 && only) return only;
+	if (free.length > 0) return undefined;
+	return slots.find(
+		(slot): slot is StringSlot =>
+			slot.kind === "string" && slot.flag === "query" && !slot.enumValues,
+	);
 }
 
 /** Help text for `stophy <source> <command> --help`. */
@@ -905,8 +909,9 @@ export function formatEndpointHelp(endpoint: CatalogEndpoint): string {
 	const slots = slotsFromInput(endpoint.input);
 	const positional = positionalSlot(slots);
 	const words = endpoint.id.split(".").join(" ");
+	const name = positional ? argName(positional.flag) : "";
 	const usage = positional
-		? `stophy ${words} <${argName(positional.flag)}> [options]`
+		? `stophy ${words} ${positional.always ? `<${name}>` : `[${name}]`} [options]`
 		: `stophy ${words} [options]`;
 	const rows: [string, string][] = [
 		...slots
@@ -934,7 +939,11 @@ export function formatDescribe(endpoint: CatalogEndpoint): string {
 	const slots = slotsFromInput(endpoint.input);
 	const positional = positionalSlot(slots);
 	const rows = slots.map((slot): [string, string] => [
-		slot === positional ? `<${argName(slot.flag)}>` : optionName(slot),
+		slot === positional
+			? slot.always
+				? `<${argName(slot.flag)}>`
+				: `[${argName(slot.flag)}]`
+			: optionName(slot),
 		optionText(slot),
 	]);
 	return [
@@ -1089,10 +1098,7 @@ function quoteArg(value: string): string {
 
 /** `stophy endpoints` listing. Keyless endpoints are marked free. */
 export function formatEndpointIndex(
-	endpoints: readonly Pick<
-		CatalogEndpoint,
-		"id" | "credits" | "keyless" | "perItems"
-	>[],
+	endpoints: readonly Pick<CatalogEndpoint, "id" | "credits" | "keyless">[],
 	term?: string,
 ): string {
 	const query = term?.trim().toLowerCase() ?? "";
@@ -1109,7 +1115,7 @@ export function formatEndpointIndex(
 			: `No endpoints match \`${term?.trim()}\`.`;
 	}
 	const idWidth = Math.max(...rows.map((row) => row.id.length));
-	const costs = rows.map((row) => creditPhrase(row.credits, row.perItems));
+	const costs = rows.map((row) => creditPhrase(row.credits));
 	const costWidth = Math.max(...costs.map((cost) => cost.length));
 	return rows
 		.map((row, index) => {
