@@ -11,8 +11,6 @@ const endpoint = {
 	path: "/v1/youtube/search",
 	credits: 1,
 	keyless: true,
-	perItems: 20,
-	cacheTtlSeconds: 60,
 	input: { type: "object", properties: {}, additionalProperties: false },
 };
 

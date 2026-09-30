@@ -1,6 +1,6 @@
 # Stophy CLI
 
-Live data from 40+ sites in your terminal: web search, YouTube, Reddit, Google Maps, Amazon, jobs, real estate, ads, stocks and crypto. Results print as markdown, or as JSON with `--json`.
+Live data from 40+ sites in your terminal: web search, YouTube, Reddit, Google Maps, Amazon, jobs, real estate, ads, stocks and crypto. Results print as readable rows, or as JSON with `--json`.
 
 ## Get started
 
@@ -69,8 +69,11 @@ Name the source, then the command:
 
 ```bash
 stophy youtube search "bun runtime" --limit 5
-stophy maps search dentist --near Berlin --country de
+stophy maps search --query dentist --location Berlin
 stophy reddit subreddit rust
+stophy transcript https://youtu.be/M4TufsFlv_o
+stophy suggest "how to" --source youtube
+stophy ads search nike --network meta
 ```
 
 To see what a source can do, run `stophy <source> --help`. To see every option for a command, run `stophy <source> <command> --help`.
@@ -79,17 +82,19 @@ Options work like this:
 
 - Give an option once, or give a list as `--features live,hd` or `--features live --features hd`.
 - Turn a yes-or-no option on with `--flag` and off with `--no-flag`.
+- When a command needs a choice such as `--network`, `--source` or `--by`, give it as an option.
 - If you give a value the command does not accept, the CLI stops before it calls Stophy and says which values work.
 
 To change the output:
 
+- By default, lists print one row per result with its title and link. Other results print as `name: value` lines.
 - `--json` prints the data as JSON and prints the credits used to stderr.
 - `--raw` prints the full response, including its request id.
 - `-o <path>` writes the output to a file.
 
-When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
+`--limit` keeps at most that many results from a page and costs the same. When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
 
-`web search`, `youtube search`, and `youtube transcript` work without logging in.
+`web search`, `youtube search`, and `transcript` work without logging in.
 
 When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 

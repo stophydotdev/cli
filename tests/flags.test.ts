@@ -8,8 +8,6 @@ const search = {
 	path: "/v1/youtube/search",
 	credits: 1,
 	keyless: true,
-	perItems: 20,
-	cacheTtlSeconds: 3600,
 	input: {
 		type: "object",
 		properties: {
@@ -38,29 +36,53 @@ const search = {
 };
 
 const maps = {
-	id: "maps.search",
+	id: "zillow.search",
 	method: "POST",
-	path: "/v1/maps/search",
-	credits: 3,
+	path: "/v1/zillow/search",
+	credits: 2,
 	keyless: false,
-	perItems: 20,
-	cacheTtlSeconds: 3600,
 	input: {
 		type: "object",
 		properties: {
 			query: { type: "string", minLength: 1 },
-			center: {
-				type: "object",
-				properties: {
-					lat: { type: "number", minimum: -90, maximum: 90 },
-					lng: { type: "number", minimum: -180, maximum: 180 },
-				},
-				required: ["lat", "lng"],
-			},
-			radiusKm: { default: 5, type: "number", exclusiveMinimum: 0, maximum: 100 },
+			minPrice: { type: "integer", minimum: 0 },
+			maxPrice: { type: "integer", minimum: 0 },
 			includePosts: { default: true, type: "boolean" },
 		},
 		required: ["query"],
+	},
+};
+
+const ads = {
+	id: "ads.search",
+	method: "POST",
+	path: "/v1/ads/search",
+	credits: 2,
+	keyless: false,
+	input: {
+		type: "object",
+		properties: {
+			query: { type: "string", minLength: 1 },
+			network: { type: "string", enum: ["meta", "google", "tiktok"] },
+			limit: { type: "integer", minimum: 1, maximum: 100 },
+		},
+		required: ["network"],
+	},
+};
+
+const suggest = {
+	id: "suggest",
+	method: "POST",
+	path: "/v1/suggest",
+	credits: 1,
+	keyless: false,
+	input: {
+		type: "object",
+		properties: {
+			query: { type: "string", minLength: 1 },
+			source: { type: "string", enum: ["google", "youtube", "amazon"] },
+		},
+		required: ["query", "source"],
 	},
 };
 
@@ -126,30 +148,34 @@ test("rejects bad enums, integers, patterns, and bounds", () => {
 	});
 });
 
-test("builds nested objects and boolean flags", () => {
-	const missing = parseCall(["--query", "dentist", "--center.lat", "52.5"], maps.input);
-	expect(missing).toEqual({ ok: false, message: "Missing required flag --center.lng." });
+test("builds flat numbers and boolean flags", () => {
+	const bad = parseCall(["austin", "--minPrice", "-5"], maps.input);
+	expect(bad.ok).toBe(false);
 
-	const parsed = parseCall(
-		["--query", "dentist", "--center.lat", "52.5", "--center.lng", "13.4", "--radiusKm", "0", "--no-includePosts"],
-		maps.input,
-	);
-	expect(parsed).toMatchObject({
-		ok: false,
-		message: "--radiusKm must be greater than 0.",
-	});
-
-	const ok = parseCall(
-		["--query", "dentist", "--center.lat", "52.5", "--center.lng", "13.4", "--no-includePosts"],
-		maps.input,
-	);
+	const ok = parseCall(["austin", "--minPrice", "100", "--maxPrice", "900", "--no-includePosts"], maps.input);
 	expect(ok).toEqual({
 		ok: true,
-		call: {
-			format: "markdown",
-			body: { query: "dentist", center: { lat: 52.5, lng: 13.4 }, includePosts: false },
-		},
+		call: { format: "text", body: { query: "austin", minPrice: 100, maxPrice: 900, includePosts: false } },
 	});
+});
+
+test("a required enum switch is a flag, and the query stays positional", () => {
+	expect(parseCall([], ads.input)).toEqual({ ok: false, message: "Missing required flag --network." });
+	expect(parseCall(["nike", "--network", "meta", "--limit", "3"], ads.input)).toEqual({
+		ok: true,
+		call: { format: "text", body: { query: "nike", network: "meta", limit: 3 } },
+	});
+	expect(parseCall(["--network", "bing"], ads.input)).toMatchObject({
+		ok: false,
+		message: "--network must be one of: meta, google, tiktok.",
+	});
+	expect(formatEndpointHelp(ads)).toContain("Usage: stophy ads search [query] [options]");
+	expect(parseCall(["how to", "--source", "youtube"], suggest.input)).toEqual({
+		ok: true,
+		call: { format: "text", body: { query: "how to", source: "youtube" } },
+	});
+	expect(parseCall(["how to"], suggest.input)).toEqual({ ok: false, message: "Missing required flag --source." });
+	expect(formatEndpointHelp(suggest)).toContain("Usage: stophy suggest <query> [options]");
 });
 
 test("accepts number enums from anyOf const", () => {
@@ -165,7 +191,7 @@ test("accepts number enums from anyOf const", () => {
 			},
 		},
 	});
-	expect(parsed).toEqual({ ok: true, call: { format: "markdown", body: { rankUpTo: 200 } } });
+	expect(parsed).toEqual({ ok: true, call: { format: "text", body: { rankUpTo: 200 } } });
 	expect(parseCall(["--rankUpTo", "50"], {
 		type: "object",
 		properties: {
@@ -197,7 +223,7 @@ test("help reads like a person wrote it: summary, positional input, options, exa
 		expect(help).not.toContain(internal);
 	}
 	expect(formatDescribe(search)).toContain("youtube.search");
-	expect(formatDescribe(search)).toContain("Cost: 1 credit per 20 items.");
+	expect(formatDescribe(search)).toContain("Cost: 1 credit per call.");
 });
 
 test("the one required text field can be given without its flag", () => {

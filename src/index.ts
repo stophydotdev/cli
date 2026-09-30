@@ -59,7 +59,8 @@ Run stophy <source> --help to see what it can do.
 
 Examples:
   $ stophy youtube search "bun runtime" --limit 5
-  $ stophy maps search dentist --near Berlin --country de
+  $ stophy transcript https://youtu.be/M4TufsFlv_o
+  $ stophy suggest "how to" --source youtube
   $ stophy reddit subreddit rust
 `,
 		)
