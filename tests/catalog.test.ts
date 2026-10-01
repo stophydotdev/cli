@@ -10,7 +10,7 @@ const endpoint = {
 	method: "POST" as const,
 	path: "/v1/youtube/search",
 	credits: 1,
-	keyless: true,
+	keyless: false,
 	input: { type: "object", properties: {}, additionalProperties: false },
 };
 

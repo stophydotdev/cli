@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-/** One API credit is 2000 micros ($0.002), the same ratio the API uses for billing. */
-export const MICROS_PER_CREDIT = 2_000;
+/** One API credit is 1500 micros ($0.0015), the same ratio the API uses for billing. */
+export const MICROS_PER_CREDIT = 1_500;
 
 const MICROS_PER_DOLLAR = 1_000_000;
 

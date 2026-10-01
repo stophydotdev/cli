@@ -19,7 +19,7 @@ test("nested catalog commands reach the matching endpoint", async () => {
 				method: "POST",
 				path: "/v1/youtube/search",
 				credits: 1,
-				keyless: true,
+				keyless: false,
 				input: {
 					type: "object",
 					properties: { query: { type: "string", minLength: 1 } },
@@ -43,7 +43,7 @@ test("nested catalog commands reach the matching endpoint", async () => {
 				method: "POST",
 				path: "/v1/transcript",
 				credits: 2,
-				keyless: true,
+				keyless: false,
 				input: {
 					type: "object",
 					properties: { video: { type: "string" } },

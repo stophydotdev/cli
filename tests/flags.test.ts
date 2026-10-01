@@ -7,7 +7,7 @@ const search = {
 	method: "POST",
 	path: "/v1/youtube/search",
 	credits: 1,
-	keyless: true,
+	keyless: false,
 	input: {
 		type: "object",
 		properties: {
@@ -32,6 +32,19 @@ const search = {
 		},
 		required: ["query"],
 		additionalProperties: false,
+	},
+};
+
+const web = {
+	id: "web.search",
+	method: "POST",
+	path: "/v1/web/search",
+	credits: 1,
+	keyless: true,
+	input: {
+		type: "object",
+		properties: { query: { type: "string", minLength: 1 } },
+		required: ["query"],
 	},
 };
 
@@ -70,19 +83,19 @@ const ads = {
 	},
 };
 
-const suggest = {
-	id: "suggest",
+const advertisers = {
+	id: "ads.advertisers",
 	method: "POST",
-	path: "/v1/suggest",
-	credits: 1,
+	path: "/v1/ads/advertisers",
+	credits: 2,
 	keyless: false,
 	input: {
 		type: "object",
 		properties: {
 			query: { type: "string", minLength: 1 },
-			source: { type: "string", enum: ["google", "youtube", "amazon"] },
+			network: { type: "string", enum: ["meta", "google", "tiktok"] },
 		},
-		required: ["query", "source"],
+		required: ["query", "network"],
 	},
 };
 
@@ -170,12 +183,27 @@ test("a required enum switch is a flag, and the query stays positional", () => {
 		message: "--network must be one of: meta, google, tiktok.",
 	});
 	expect(formatEndpointHelp(ads)).toContain("Usage: stophy ads search [query] [options]");
-	expect(parseCall(["how to", "--source", "youtube"], suggest.input)).toEqual({
+	expect(parseCall(["nike", "--network", "meta"], advertisers.input)).toEqual({
 		ok: true,
-		call: { format: "text", body: { query: "how to", source: "youtube" } },
+		call: { format: "text", body: { query: "nike", network: "meta" } },
 	});
-	expect(parseCall(["how to"], suggest.input)).toEqual({ ok: false, message: "Missing required flag --source." });
-	expect(formatEndpointHelp(suggest)).toContain("Usage: stophy suggest <query> [options]");
+	expect(parseCall(["nike"], advertisers.input)).toEqual({ ok: false, message: "Missing required flag --network." });
+	expect(formatEndpointHelp(advertisers)).toContain("Usage: stophy ads advertisers <query> [options]");
+});
+
+test("a cursor from the server is sent back as given", () => {
+	const input = {
+		type: "object",
+		properties: {
+			profile: { type: "string" },
+			cursor: { type: "string", minLength: 1 },
+		},
+		required: ["profile"],
+	};
+	expect(parseCall(["bun", "--cursor", "sp1.eyJvIjoyfQ"], input)).toEqual({
+		ok: true,
+		call: { format: "text", body: { profile: "bun", cursor: "sp1.eyJvIjoyfQ" } },
+	});
 });
 
 test("accepts number enums from anyOf const", () => {
@@ -246,10 +274,10 @@ test("the one required text field can be given without its flag", () => {
 });
 
 test("endpoint index filters and marks keyless calls free", () => {
-	const text = formatEndpointIndex([search, maps], "youtube");
-	expect(text).toContain("youtube.search");
+	const text = formatEndpointIndex([web, maps], "web");
+	expect(text).toContain("web.search");
 	expect(text).toContain("free");
-	expect(text).not.toContain("maps.search");
-	expect(formatEndpointIndex([maps], "maps")).not.toContain("free");
+	expect(text).not.toContain("zillow.search");
+	expect(formatEndpointIndex([maps], "zillow")).not.toContain("free");
 	expect(formatEndpointIndex([search], "nope")).toBe("No endpoints match `nope`.");
 });
