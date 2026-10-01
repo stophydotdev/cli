@@ -196,7 +196,7 @@ test("a cursor from the server is sent back as given", () => {
 		type: "object",
 		properties: {
 			profile: { type: "string" },
-			cursor: { type: "string", pattern: "^\\d{1,3}$" },
+			cursor: { type: "string", minLength: 1 },
 		},
 		required: ["profile"],
 	};
