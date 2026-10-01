@@ -15,6 +15,7 @@ export const endpointSchema = z.object({
 	method: z.literal("POST"),
 	path: z.string().min(1),
 	credits: z.number().int().nonnegative(),
+	pricing: z.string().min(1).nullish(),
 	keyless: z.boolean(),
 	input: z.record(z.string(), z.unknown()),
 	example: z.record(z.string(), z.unknown()).nullable().optional(),

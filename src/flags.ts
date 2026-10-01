@@ -883,8 +883,22 @@ export function creditPhrase(credits: number): string {
 	return `${credits} ${credits === 1 ? "credit" : "credits"}`;
 }
 
-export function costLine(endpoint: { readonly credits: number }): string {
+/** Cost for `describe`. The catalog's `pricing` wins when the price is not flat. */
+export function costLine(endpoint: {
+	readonly credits: number;
+	readonly pricing?: string | null;
+}): string {
+	if (endpoint.pricing) return `Cost: ${endpoint.pricing}.`;
 	return `Cost: ${creditPhrase(endpoint.credits)} per call.`;
+}
+
+/** Cost column for `endpoints`. A price that is not flat shows its lowest price. */
+function costCell(endpoint: {
+	readonly credits: number;
+	readonly pricing?: string | null;
+}): string {
+	const phrase = creditPhrase(endpoint.credits);
+	return endpoint.pricing ? `from ${phrase}` : phrase;
 }
 
 export function positionalSlot(slots: readonly Slot[]): StringSlot | undefined {
@@ -1098,7 +1112,10 @@ function quoteArg(value: string): string {
 
 /** `stophy endpoints` listing. Keyless endpoints are marked free. */
 export function formatEndpointIndex(
-	endpoints: readonly Pick<CatalogEndpoint, "id" | "credits" | "keyless">[],
+	endpoints: readonly Pick<
+		CatalogEndpoint,
+		"id" | "credits" | "pricing" | "keyless"
+	>[],
 	term?: string,
 ): string {
 	const query = term?.trim().toLowerCase() ?? "";
@@ -1115,7 +1132,7 @@ export function formatEndpointIndex(
 			: `No endpoints match \`${term?.trim()}\`.`;
 	}
 	const idWidth = Math.max(...rows.map((row) => row.id.length));
-	const costs = rows.map((row) => creditPhrase(row.credits));
+	const costs = rows.map(costCell);
 	const costWidth = Math.max(...costs.map((cost) => cost.length));
 	return rows
 		.map((row, index) => {

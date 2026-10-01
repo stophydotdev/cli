@@ -1,6 +1,6 @@
 # Stophy CLI
 
-The web data layer for AI agents, in your terminal. Live web data as typed JSON for AI agents. Search, video, social, jobs, places, property and ads behind one key, with a flat price per call. You pay only for answers that come back. Results print as readable rows, or as JSON with `--json`.
+The web data layer for AI agents, in your terminal. Live web data as typed JSON for AI agents. Search, video, social, jobs, places, property and ads behind one key, with a price shown before every call. You pay only for answers that come back. Results print as readable rows, or as JSON with `--json`.
 
 ## Get started
 

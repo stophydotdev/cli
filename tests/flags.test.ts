@@ -281,3 +281,27 @@ test("endpoint index filters and marks keyless calls free", () => {
 	expect(formatEndpointIndex([maps], "zillow")).not.toContain("free");
 	expect(formatEndpointIndex([search], "nope")).toBe("No endpoints match `nope`.");
 });
+
+const transcript = {
+	id: "transcript",
+	method: "POST",
+	path: "/v1/transcript",
+	credits: 2,
+	pricing: "2 credits when the video has captions; otherwise 2 credits plus 1 credit for every 10 seconds of audio, up to 30 minutes",
+	keyless: false,
+	input: {
+		type: "object",
+		properties: { video: { type: "string", minLength: 1 } },
+		required: ["video"],
+	},
+};
+
+test("a price that is not flat shows its terms, not one number", () => {
+	expect(formatDescribe(transcript)).toContain(
+		"Cost: 2 credits when the video has captions; otherwise 2 credits plus 1 credit for every 10 seconds of audio, up to 30 minutes.",
+	);
+	expect(formatDescribe(transcript)).not.toContain("per call");
+	const list = formatEndpointIndex([search, transcript]);
+	expect(list).toMatch(/^transcript +from 2 credits$/mu);
+	expect(list).toMatch(/^youtube\.search +1 credit +$/mu);
+});
