@@ -1,6 +1,6 @@
 # Stophy CLI
 
-Live data from 40+ sites in your terminal: web search, YouTube, Reddit, Google Maps, Amazon, jobs, real estate, ads, stocks and crypto. Results print as readable rows, or as JSON with `--json`.
+The web data layer for AI agents, in your terminal. Live web data as typed JSON for AI agents. Search, video, social, jobs, places, property and ads behind one key, with a flat price per call. You pay only for answers that come back. Results print as readable rows, or as JSON with `--json`.
 
 ## Get started
 
@@ -72,7 +72,7 @@ stophy youtube search "bun runtime" --limit 5
 stophy maps search --query dentist --location Berlin
 stophy reddit subreddit rust
 stophy transcript https://youtu.be/M4TufsFlv_o
-stophy suggest "how to" --source youtube
+stophy tiktok profile tiktok --limit 5
 stophy ads search nike --network meta
 ```
 
@@ -94,7 +94,7 @@ To change the output:
 
 `--limit` keeps at most that many results from a page and costs the same. When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
 
-`web search`, `youtube search`, and `transcript` work without logging in.
+`stophy web search` works without logging in. Every other command needs a login or an API key.
 
 When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 

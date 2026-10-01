@@ -60,7 +60,7 @@ Run stophy <source> --help to see what it can do.
 Examples:
   $ stophy youtube search "bun runtime" --limit 5
   $ stophy transcript https://youtu.be/M4TufsFlv_o
-  $ stophy suggest "how to" --source youtube
+  $ stophy tiktok profile tiktok --limit 5
   $ stophy reddit subreddit rust
 `,
 		)

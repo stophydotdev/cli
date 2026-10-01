@@ -711,7 +711,12 @@ function readStringValue(
 	if (slot.maxLength !== undefined && value.length > slot.maxLength) {
 		return fail(`--${slot.flag} must be at most ${slot.maxLength} characters.`);
 	}
-	if (slot.patterns && !matchesPattern(value, slot.patterns)) {
+	// A cursor is opaque. Only the server knows every shape it hands out.
+	if (
+		slot.patterns &&
+		slot.flag !== "cursor" &&
+		!matchesPattern(value, slot.patterns)
+	) {
 		const hint = slot.description ? ` ${slot.description}` : "";
 		return fail(`--${slot.flag} does not match the expected format.${hint}`);
 	}
