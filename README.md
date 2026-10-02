@@ -68,13 +68,13 @@ Each computer gets its own key. Logging in again on the same computer replaces i
 Name the source, then the command:
 
 ```bash
-stophy google search "bun runtime" --limit 5
+stophy google search "bun runtime" --page 2
 stophy linkedin people search --title "Head of Growth" --company Stripe
-stophy youtube search "bun runtime" --limit 5
+stophy youtube search "bun runtime"
 stophy maps search --query dentist --location Berlin
 stophy reddit subreddit rust
 stophy transcript https://youtu.be/M4TufsFlv_o
-stophy tiktok profile tiktok --limit 5
+stophy tiktok profile tiktok
 stophy ads search nike --network meta
 ```
 
@@ -94,9 +94,9 @@ To change the output:
 - `--raw` prints the full response, including its request id.
 - `-o <path>` writes the output to a file.
 
-`--limit` keeps at most that many results from a page and costs the same. When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
+Each command returns one page of results, as the site shows it. Some commands take a page number: the output shows `page` and `hasMore`, and you run the same command with `--page 2` for the next page. Others end with a `cursor` when there is more: run the same command with `--cursor <cursor>` to get the next page.
 
-`stophy google search` works without logging in. Every other command needs a login or an API key.
+`stophy google search`, `stophy google news`, `stophy youtube search`, `stophy youtube video` and `stophy transcript` (for YouTube videos) work without logging in. Every other command needs a login or an API key.
 
 When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 

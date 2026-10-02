@@ -58,9 +58,10 @@ function buildProgram({ endpoints, sources }: Catalog): Command {
 Run stophy <source> --help to see what it can do.
 
 Examples:
-  $ stophy youtube search "bun runtime" --limit 5
+  $ stophy google search "bun runtime" --page 2
+  $ stophy youtube search "bun runtime"
   $ stophy transcript https://youtu.be/M4TufsFlv_o
-  $ stophy tiktok profile tiktok --limit 5
+  $ stophy tiktok profile tiktok
   $ stophy reddit subreddit rust
 `,
 		)
@@ -108,7 +109,6 @@ async function main() {
 	setCurrentArgs(args);
 
 	let catalog: Catalog = { endpoints: [], sources: [] };
-	let background: Promise<void> | undefined;
 	if (catalogNeeded(args)) {
 		try {
 			const loaded = await loadCatalog({
@@ -120,8 +120,7 @@ async function main() {
 					process.stderr.write(`${message}\n`);
 				},
 			});
-			catalog = { endpoints: loaded.endpoints, sources: loaded.sources };
-			background = loaded.background;
+			catalog = loaded;
 		} catch (error) {
 			if (!catalogOptional(args)) throw error;
 			const message =
@@ -133,11 +132,7 @@ async function main() {
 	}
 
 	const program = buildProgram(catalog);
-	try {
-		await program.parseAsync(args, { from: "user" });
-	} finally {
-		if (background) await background;
-	}
+	await program.parseAsync(args, { from: "user" });
 	await maybeShowUpdateNotice();
 }
 
