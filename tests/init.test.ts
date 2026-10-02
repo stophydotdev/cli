@@ -63,7 +63,7 @@ test("--all logs in, installs the skills and adds the MCP server, in that order"
 		],
 		["claude", "mcp", "add", "--transport", "http", "stophy", MCP_URL],
 	]);
-	expect(output).toContain('stophy web search "latest bun release" --limit 3');
+	expect(output).toContain('stophy google search "latest bun release" --limit 3');
 });
 
 test("a logged-in user is not sent to the browser", async () => {
