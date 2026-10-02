@@ -68,6 +68,8 @@ Each computer gets its own key. Logging in again on the same computer replaces i
 Name the source, then the command:
 
 ```bash
+stophy google search "bun runtime" --limit 5
+stophy linkedin people search --title "Head of Growth" --company Stripe
 stophy youtube search "bun runtime" --limit 5
 stophy maps search --query dentist --location Berlin
 stophy reddit subreddit rust
@@ -94,7 +96,7 @@ To change the output:
 
 `--limit` keeps at most that many results from a page and costs the same. When there are more results, the output ends with a cursor. To get the next page, run the same command with `--cursor <cursor>`.
 
-`stophy web search` works without logging in. Every other command needs a login or an API key.
+`stophy google search` works without logging in. Every other command needs a login or an API key.
 
 When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 
