@@ -28,7 +28,7 @@ const search = {
 				pattern: "^[A-Za-z]{2}$",
 				description: "ISO country code.",
 			},
-			limit: { default: 20, type: "integer", minimum: 1, maximum: 100 },
+			page: { default: 1, type: "integer", minimum: 1, maximum: 100, description: "Page number, starting at 1." },
 		},
 		required: ["query"],
 		additionalProperties: false,
@@ -77,7 +77,7 @@ const ads = {
 		properties: {
 			query: { type: "string", minLength: 1 },
 			network: { type: "string", enum: ["meta", "google", "tiktok"] },
-			limit: { type: "integer", minimum: 1, maximum: 100 },
+			cursor: { type: "string", minLength: 1 },
 		},
 		required: ["network"],
 	},
@@ -104,10 +104,10 @@ test("strips a global refresh flag and finds command flags", () => {
 		refresh: true,
 		args: ["youtube", "search", "--query", "bun"],
 	});
-	expect(flagTokens(["youtube", "search", "--query", "bun runtime", "--limit", "2"], ["youtube", "search"])).toEqual([
+	expect(flagTokens(["youtube", "search", "--query", "bun runtime", "--page", "2"], ["youtube", "search"])).toEqual([
 		"--query",
 		"bun runtime",
-		"--limit",
+		"--page",
 		"2",
 	]);
 });
@@ -122,21 +122,21 @@ test("requires fields before the call and rejects unknown flags", () => {
 	if (!unknown.ok) {
 		expect(unknown.message).toContain("Unknown flag --q.");
 		expect(unknown.message).toContain("--query");
-		expect(unknown.message).toContain("--limit");
+		expect(unknown.message).toContain("--page");
 		expect(unknown.message).toContain("--json");
 	}
 });
 
 test("parses strings, integers, enums, arrays, and output flags", () => {
 	const parsed = parseCall(
-		["--query", "bun runtime", "--type", "shorts", "--limit", "2", "--features", "live,hd", "--json"],
+		["--query", "bun runtime", "--type", "shorts", "--page", "2", "--features", "live,hd", "--json"],
 		search.input,
 	);
 	expect(parsed).toEqual({
 		ok: true,
 		call: {
 			format: "json",
-			body: { query: "bun runtime", type: "shorts", limit: 2, features: ["live", "hd"] },
+			body: { query: "bun runtime", type: "shorts", page: 2, features: ["live", "hd"] },
 		},
 	});
 });
@@ -147,9 +147,9 @@ test("rejects bad enums, integers, patterns, and bounds", () => {
 		ok: false,
 		message: "--type must be one of: videos, all, channels, playlists, shorts.",
 	});
-	expect(parseCall(["--query", "bun", "--limit", "2.5"], search.input)).toMatchObject({
+	expect(parseCall(["--query", "bun", "--page", "2.5"], search.input)).toMatchObject({
 		ok: false,
-		message: "--limit must be an integer.",
+		message: "--page must be an integer.",
 	});
 	expect(parseCall(["--query", "bun", "--country", "Germany"], search.input)).toMatchObject({
 		ok: false,
@@ -174,9 +174,9 @@ test("builds flat numbers and boolean flags", () => {
 
 test("a required enum switch is a flag, and the query stays positional", () => {
 	expect(parseCall([], ads.input)).toEqual({ ok: false, message: "Missing required flag --network." });
-	expect(parseCall(["nike", "--network", "meta", "--limit", "3"], ads.input)).toEqual({
+	expect(parseCall(["nike", "--network", "meta", "--cursor", "AQHRx9"], ads.input)).toEqual({
 		ok: true,
-		call: { format: "text", body: { query: "nike", network: "meta", limit: 3 } },
+		call: { format: "text", body: { query: "nike", network: "meta", cursor: "AQHRx9" } },
 	});
 	expect(parseCall(["--network", "bing"], ads.input)).toMatchObject({
 		ok: false,
@@ -191,6 +191,12 @@ test("a required enum switch is a flag, and the query stays positional", () => {
 	expect(formatEndpointHelp(advertisers)).toContain("Usage: stophy ads advertisers <query> [options]");
 });
 
+test("limit is not a flag", () => {
+	const parsed = parseCall(["--query", "bun", "--limit", "5"], search.input);
+	expect(parsed.ok).toBe(false);
+	if (!parsed.ok) expect(parsed.message).toContain("Unknown flag --limit.");
+});
+
 test("a cursor from the server is sent back as given", () => {
 	const input = {
 		type: "object",
@@ -200,9 +206,9 @@ test("a cursor from the server is sent back as given", () => {
 		},
 		required: ["profile"],
 	};
-	expect(parseCall(["bun", "--cursor", "sp1.eyJvIjoyfQ"], input)).toEqual({
+	expect(parseCall(["bun", "--cursor", "EpcDEgNidW4"], input)).toEqual({
 		ok: true,
-		call: { format: "text", body: { profile: "bun", cursor: "sp1.eyJvIjoyfQ" } },
+		call: { format: "text", body: { profile: "bun", cursor: "EpcDEgNidW4" } },
 	});
 });
 
@@ -237,14 +243,14 @@ test("help reads like a person wrote it: summary, positional input, options, exa
 	const help = formatEndpointHelp({
 		...search,
 		summary: "Search YouTube videos, channels, playlists and shorts",
-		example: { query: "bun runtime", limit: 5 },
+		example: { query: "bun runtime", page: 2 },
 	});
 	expect(help).toContain("Usage: stophy youtube search <query> [options]");
 	expect(help).toContain("Search YouTube videos, channels, playlists and shorts.");
 	expect(help).toMatch(/--type <type> +videos, all, channels, playlists or shorts \(default: videos\)/u);
 	expect(help).toMatch(/--features <list> +Comma-separated: live, hd, 4k/u);
-	expect(help).toMatch(/--limit <number> +Number of results \(default: 20, max: 100\)/u);
-	expect(help).toContain('stophy youtube search "bun runtime" --limit 5');
+	expect(help).toMatch(/--page <number> +Page number, starting at 1 \(default: 1, max: 100\)/u);
+	expect(help).toContain('stophy youtube search "bun runtime" --page 2');
 	expect(help).toContain("--json");
 	expect(help).toMatch(/--raw +Output the full response with its request id/u);
 	for (const internal of ["youtube.search", "credit", "cached", "3600", "characters", "endpoint"]) {
@@ -255,9 +261,9 @@ test("help reads like a person wrote it: summary, positional input, options, exa
 });
 
 test("the one required text field can be given without its flag", () => {
-	expect(parseCall(["bun runtime", "--limit", "5"], search.input)).toMatchObject({
+	expect(parseCall(["bun runtime", "--page", "5"], search.input)).toMatchObject({
 		ok: true,
-		call: { body: { query: "bun runtime", limit: 5 } },
+		call: { body: { query: "bun runtime", page: 5 } },
 	});
 	expect(parseCall(["--query", "bun"], search.input)).toMatchObject({
 		ok: true,

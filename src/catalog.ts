@@ -12,20 +12,19 @@ export const endpointSchema = z.object({
 	title: z.string().min(1).optional(),
 	summary: z.string().min(1).optional(),
 	bestWhen: z.string().min(1).nullish(),
-	method: z.literal("POST"),
 	path: z.string().min(1),
-	credits: z.number().int().nonnegative(),
-	pricing: z.string().min(1).nullish(),
-	keyless: z.boolean(),
+	credits: z.number().nonnegative().optional().catch(undefined),
+	pricing: z.string().min(1).nullish().catch(undefined),
+	keyless: z.boolean().catch(false),
 	input: z.record(z.string(), z.unknown()),
-	example: z.record(z.string(), z.unknown()).nullable().optional(),
+	example: z.record(z.string(), z.unknown()).nullish().catch(undefined),
 });
 
 export type CatalogEndpoint = z.infer<typeof endpointSchema>;
 
 const sourceSchema = z.object({
 	id: z.string().min(1),
-	summary: z.string().min(1),
+	summary: z.string().min(1).optional().catch(undefined),
 });
 
 export type CatalogSource = z.infer<typeof sourceSchema>;
@@ -35,15 +34,24 @@ export interface Catalog {
 	readonly sources: readonly CatalogSource[];
 }
 
+/** Entries the CLI cannot use are skipped, so a new catalog field or shape never breaks every command. */
+const usable = <T extends z.ZodType>(schema: T) =>
+	z.array(z.unknown()).transform((items) =>
+		items.flatMap((item) => {
+			const parsed = schema.safeParse(item);
+			return parsed.success ? [parsed.data as z.infer<T>] : [];
+		}),
+	);
+
 const catalogResponseSchema = z.object({
-	endpoints: z.array(endpointSchema),
-	sources: z.array(sourceSchema).optional(),
+	endpoints: usable(endpointSchema),
+	sources: usable(sourceSchema).optional().catch(undefined),
 });
 
 const storedSchema = z.object({
 	fetchedAt: z.string().min(1),
-	endpoints: z.array(endpointSchema),
-	sources: z.array(sourceSchema).optional(),
+	endpoints: usable(endpointSchema),
+	sources: usable(sourceSchema).optional().catch(undefined),
 });
 
 interface StoredCatalog extends Catalog {
@@ -67,14 +75,14 @@ export function catalogFilePath(): string {
 	return join(dirname(getConfigPath()), "catalog.json");
 }
 
-/** Load `GET /v1/endpoints`, using a 5 minute cache and a background refresh when it is older. */
+/** Load `GET /v1/endpoints`, using a 5 minute cache. An older cache is refetched, and used only when that fails. */
 export async function loadCatalog(options: {
 	readonly file: string;
 	readonly now: number;
 	readonly force: boolean;
 	readonly fetch: () => Promise<Catalog>;
 	readonly warn: (message: string) => void;
-}): Promise<Catalog & { background?: Promise<void> }> {
+}): Promise<Catalog> {
 	const cached = await readStored(options.file);
 	const plan = planCatalog({
 		fetchedAt: cached?.fetchedAt,
@@ -82,12 +90,6 @@ export async function loadCatalog(options: {
 		force: options.force,
 	});
 	if (plan === "fresh" && cached) return catalogOf(cached);
-	if (plan === "stale" && cached) {
-		return {
-			...catalogOf(cached),
-			background: refresh(options, cached.fetchedAt),
-		};
-	}
 	try {
 		const catalog = await options.fetch();
 		assertCatalog(catalog.endpoints);
@@ -114,7 +116,11 @@ export async function fetchCatalog(): Promise<Catalog> {
 		path: "/v1/endpoints",
 		accept: "application/json",
 	});
-	const parsed = catalogResponseSchema.safeParse(response.json);
+	return parseCatalog(response.json);
+}
+
+export function parseCatalog(json: unknown): Catalog {
+	const parsed = catalogResponseSchema.safeParse(json);
 	if (!parsed.success)
 		throw new CliError("Server returned an unexpected endpoint catalog.");
 	assertCatalog(parsed.data.endpoints);
@@ -122,25 +128,6 @@ export async function fetchCatalog(): Promise<Catalog> {
 		endpoints: parsed.data.endpoints,
 		sources: parsed.data.sources ?? [],
 	};
-}
-
-function refresh(
-	options: {
-		readonly file: string;
-		readonly fetch: () => Promise<Catalog>;
-		readonly warn: (message: string) => void;
-	},
-	fetchedAt: number,
-): Promise<void> {
-	return options
-		.fetch()
-		.then(async (catalog) => {
-			assertCatalog(catalog.endpoints);
-			await writeStored(options.file, catalog);
-		})
-		.catch((error: unknown) => {
-			options.warn(staleWarning(error, fetchedAt));
-		});
 }
 
 function staleWarning(error: unknown, fetchedAt: number): string {

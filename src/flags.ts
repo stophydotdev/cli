@@ -885,18 +885,20 @@ export function creditPhrase(credits: number): string {
 
 /** Cost for `describe`. The catalog's `pricing` wins when the price is not flat. */
 export function costLine(endpoint: {
-	readonly credits: number;
+	readonly credits?: number;
 	readonly pricing?: string | null;
 }): string {
 	if (endpoint.pricing) return `Cost: ${endpoint.pricing}.`;
+	if (endpoint.credits === undefined) return "Cost: shown in your usage.";
 	return `Cost: ${creditPhrase(endpoint.credits)} per call.`;
 }
 
 /** Cost column for `endpoints`. A price that is not flat shows its lowest price. */
 function costCell(endpoint: {
-	readonly credits: number;
+	readonly credits?: number;
 	readonly pricing?: string | null;
 }): string {
+	if (endpoint.credits === undefined) return "";
 	const phrase = creditPhrase(endpoint.credits);
 	return endpoint.pricing ? `from ${phrase}` : phrase;
 }
@@ -975,7 +977,6 @@ export function formatDescribe(endpoint: CatalogEndpoint): string {
 
 const KNOWN_TEXT: Readonly<Record<string, string>> = {
 	cursor: "Get the next page, from a previous result",
-	limit: "Number of results",
 	country: "Country code, e.g. us, de",
 	language: "Language code, e.g. en, pt-BR",
 };

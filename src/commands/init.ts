@@ -11,7 +11,7 @@ import type { InitOptions } from "../types/init.js";
 
 const MCP_URL = "https://api.stophy.dev/mcp-oauth";
 const SKILLS_PACKAGE = "stophydotdev/skills";
-const NEXT_STEP = 'stophy google search "latest bun release" --limit 3';
+const NEXT_STEP = 'stophy google search "latest bun release"';
 
 const err = (message: string) => process.stderr.write(`${message}\n`);
 
