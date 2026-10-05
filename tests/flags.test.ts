@@ -36,9 +36,9 @@ const search = {
 };
 
 const web = {
-	id: "web.search",
+	id: "google.search",
 	method: "POST",
-	path: "/v1/web/search",
+	path: "/v1/google/search",
 	credits: 1,
 	keyless: true,
 	input: {
@@ -57,45 +57,67 @@ const maps = {
 	input: {
 		type: "object",
 		properties: {
-			query: { type: "string", minLength: 1 },
+			keywords: { type: "string", minLength: 1 },
 			minPrice: { type: "integer", minimum: 0 },
 			maxPrice: { type: "integer", minimum: 0 },
 			includePosts: { default: true, type: "boolean" },
 		},
-		required: ["query"],
+		required: ["keywords"],
 	},
 };
 
-const ads = {
-	id: "ads.search",
+const video = {
+	id: "youtube.video",
 	method: "POST",
-	path: "/v1/ads/search",
-	credits: 2,
+	path: "/v1/youtube/video",
+	credits: 1,
+	keyless: true,
+	example: { videoId: "p0fybvFyOlM" },
+	input: {
+		type: "object",
+		properties: {
+			videoUrl: { type: "string", description: "Link to the YouTube video, like https://youtu.be/p0fybvFyOlM. Send this or videoId." },
+			videoId: { type: "string", description: "YouTube video id, like p0fybvFyOlM. Send this or videoUrl." },
+		},
+		sendOne: ["videoUrl", "videoId"],
+		additionalProperties: false,
+	},
+};
+
+const profile = {
+	id: "tiktok.profile",
+	method: "POST",
+	path: "/v1/tiktok/profile",
+	credits: 1,
 	keyless: false,
 	input: {
 		type: "object",
 		properties: {
-			query: { type: "string", minLength: 1 },
-			network: { type: "string", enum: ["meta", "google", "tiktok"] },
+			userUrl: { type: "string" },
+			username: { type: "string" },
 			cursor: { type: "string", minLength: 1 },
 		},
-		required: ["network"],
+		sendOne: ["userUrl", "username"],
+		additionalProperties: false,
 	},
 };
 
-const advertisers = {
-	id: "ads.advertisers",
+const posts = {
+	id: "linkedin.posts",
 	method: "POST",
-	path: "/v1/ads/advertisers",
-	credits: 2,
+	path: "/v1/linkedin/posts",
+	credits: 1,
 	keyless: false,
 	input: {
 		type: "object",
 		properties: {
-			query: { type: "string", minLength: 1 },
-			network: { type: "string", enum: ["meta", "google", "tiktok"] },
+			profileUrl: { type: "string" },
+			profileId: { type: "string" },
+			companyUrl: { type: "string" },
+			companyId: { type: "string" },
 		},
-		required: ["query", "network"],
+		sendOne: ["profileUrl", "profileId", "companyUrl", "companyId"],
+		additionalProperties: false,
 	},
 };
 
@@ -168,27 +190,47 @@ test("builds flat numbers and boolean flags", () => {
 	const ok = parseCall(["austin", "--minPrice", "100", "--maxPrice", "900", "--no-includePosts"], maps.input);
 	expect(ok).toEqual({
 		ok: true,
-		call: { format: "text", body: { query: "austin", minPrice: 100, maxPrice: 900, includePosts: false } },
+		call: { format: "text", body: { keywords: "austin", minPrice: 100, maxPrice: 900, includePosts: false } },
 	});
 });
 
-test("a required enum switch is a flag, and the query stays positional", () => {
-	expect(parseCall([], ads.input)).toEqual({ ok: false, message: "Missing required flag --network." });
-	expect(parseCall(["nike", "--network", "meta", "--cursor", "AQHRx9"], ads.input)).toEqual({
+test("a link or an id goes to the field that fits, and exactly one is sent", () => {
+	expect(parseCall(["https://youtu.be/p0fybvFyOlM"], video.input)).toEqual({
 		ok: true,
-		call: { format: "text", body: { query: "nike", network: "meta", cursor: "AQHRx9" } },
+		call: { format: "text", body: { videoUrl: "https://youtu.be/p0fybvFyOlM" } },
 	});
-	expect(parseCall(["--network", "bing"], ads.input)).toMatchObject({
+	expect(parseCall(["p0fybvFyOlM"], video.input)).toEqual({
+		ok: true,
+		call: { format: "text", body: { videoId: "p0fybvFyOlM" } },
+	});
+	expect(parseCall(["--videoId", "p0fybvFyOlM"], video.input)).toMatchObject({ ok: true });
+	expect(parseCall([], video.input)).toEqual({ ok: false, message: "Send --videoUrl or --videoId." });
+	expect(parseCall(["p0fybvFyOlM", "--videoUrl", "https://youtu.be/p0fybvFyOlM"], video.input)).toEqual({
 		ok: false,
-		message: "--network must be one of: meta, google, tiktok.",
+		message: "Send only one of --videoUrl or --videoId.",
 	});
-	expect(formatEndpointHelp(ads)).toContain("Usage: stophy ads search [query] [options]");
-	expect(parseCall(["nike", "--network", "meta"], advertisers.input)).toEqual({
+	expect(parseCall(["p0fybvFyOlM", "https://youtu.be/p0fybvFyOlM"], video.input)).toEqual({
+		ok: false,
+		message: "Unexpected argument `https://youtu.be/p0fybvFyOlM`.",
+	});
+	expect(parseCall(["--videoId", "a", "--videoUrl", "https://youtu.be/b"], video.input)).toEqual({
+		ok: false,
+		message: "Send only one of --videoUrl or --videoId.",
+	});
+	expect(parseCall(["tiktok", "--cursor", "c1"], profile.input)).toEqual({
 		ok: true,
-		call: { format: "text", body: { query: "nike", network: "meta" } },
+		call: { format: "text", body: { username: "tiktok", cursor: "c1" } },
 	});
-	expect(parseCall(["nike"], advertisers.input)).toEqual({ ok: false, message: "Missing required flag --network." });
-	expect(formatEndpointHelp(advertisers)).toContain("Usage: stophy ads advertisers <query> [options]");
+	expect(parseCall(["satyanadella"], posts.input)).toMatchObject({ ok: false, message: "Unexpected argument `satyanadella`." });
+	expect(parseCall([], posts.input)).toEqual({
+		ok: false,
+		message: "Send --profileUrl, --profileId, --companyUrl or --companyId.",
+	});
+	expect(parseCall(["--companyId", "microsoft"], posts.input)).toMatchObject({ ok: true });
+	const help = formatEndpointHelp(video);
+	expect(help).toContain("Usage: stophy youtube video <link-or-id> [options]");
+	expect(help).toMatch(/--videoId <video-id> +YouTube video id, like p0fybvFyOlM \(send one\)/u);
+	expect(help).toContain("stophy youtube video p0fybvFyOlM");
 });
 
 test("limit is not a flag", () => {
@@ -201,14 +243,14 @@ test("a cursor from the server is sent back as given", () => {
 	const input = {
 		type: "object",
 		properties: {
-			profile: { type: "string" },
+			username: { type: "string" },
 			cursor: { type: "string", minLength: 1 },
 		},
-		required: ["profile"],
+		required: ["username"],
 	};
 	expect(parseCall(["bun", "--cursor", "EpcDEgNidW4"], input)).toEqual({
 		ok: true,
-		call: { format: "text", body: { profile: "bun", cursor: "EpcDEgNidW4" } },
+		call: { format: "text", body: { username: "bun", cursor: "EpcDEgNidW4" } },
 	});
 });
 
@@ -280,8 +322,8 @@ test("the one required text field can be given without its flag", () => {
 });
 
 test("endpoint index filters and marks keyless calls free", () => {
-	const text = formatEndpointIndex([web, maps], "web");
-	expect(text).toContain("web.search");
+	const text = formatEndpointIndex([web, maps], "google");
+	expect(text).toContain("google.search");
 	expect(text).toContain("free");
 	expect(text).not.toContain("zillow.search");
 	expect(formatEndpointIndex([maps], "zillow")).not.toContain("free");
@@ -289,25 +331,25 @@ test("endpoint index filters and marks keyless calls free", () => {
 });
 
 const transcript = {
-	id: "transcript",
+	id: "instagram.transcript",
 	method: "POST",
-	path: "/v1/transcript",
-	credits: 2,
-	pricing: "2 credits when the video has captions; otherwise 2 credits plus 1 credit for every 10 seconds of audio, up to 30 minutes",
+	path: "/v1/instagram/transcript",
+	credits: 1,
+	pricing: "1 credit when the video has captions; otherwise 2 credits plus 1 credit for every 10 seconds of audio, up to 30 minutes",
 	keyless: false,
 	input: {
 		type: "object",
-		properties: { video: { type: "string", minLength: 1 } },
-		required: ["video"],
+		properties: { postUrl: { type: "string" }, postCode: { type: "string" } },
+		sendOne: ["postUrl", "postCode"],
 	},
 };
 
 test("a price that is not flat shows its terms, not one number", () => {
 	expect(formatDescribe(transcript)).toContain(
-		"Cost: 2 credits when the video has captions; otherwise 2 credits plus 1 credit for every 10 seconds of audio, up to 30 minutes.",
+		"Cost: 1 credit when the video has captions; otherwise 2 credits plus 1 credit for every 10 seconds of audio, up to 30 minutes.",
 	);
 	expect(formatDescribe(transcript)).not.toContain("per call");
 	const list = formatEndpointIndex([search, transcript]);
-	expect(list).toMatch(/^transcript +from 2 credits$/mu);
+	expect(list).toMatch(/^instagram\.transcript +from 1 credit$/mu);
 	expect(list).toMatch(/^youtube\.search +1 credit +$/mu);
 });
