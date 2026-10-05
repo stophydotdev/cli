@@ -69,13 +69,13 @@ Name the source, then the command:
 
 ```bash
 stophy google search "bun runtime" --page 2
-stophy linkedin people search --title "Head of Growth" --company Stripe
+stophy linkedin profile satyanadella
 stophy youtube search "bun runtime"
-stophy maps search --query dentist --location Berlin
+stophy google maps search --query dentist --location Berlin
 stophy reddit subreddit rust
-stophy transcript https://youtu.be/M4TufsFlv_o
+stophy youtube transcript https://youtu.be/M4TufsFlv_o
 stophy tiktok profile tiktok
-stophy ads search nike --network meta
+stophy meta ads search nike
 ```
 
 To see what a source can do, run `stophy <source> --help`. To see every option for a command, run `stophy <source> <command> --help`.
@@ -84,7 +84,7 @@ Options work like this:
 
 - Give an option once, or give a list as `--features live,hd` or `--features live --features hd`.
 - Turn a yes-or-no option on with `--flag` and off with `--no-flag`.
-- When a command needs a choice such as `--network`, `--source` or `--by`, give it as an option.
+- To point at one thing, give its link or its id as the argument, like `stophy youtube video https://youtu.be/M4TufsFlv_o` or `stophy youtube video M4TufsFlv_o`. Or use the matching option, like `--videoUrl` or `--videoId`. Send one, not both.
 - If you give a value the command does not accept, the CLI stops before it calls Stophy and says which values work.
 
 To change the output:
@@ -94,9 +94,9 @@ To change the output:
 - `--raw` prints the full response, including its request id.
 - `-o <path>` writes the output to a file.
 
-Each command returns one page of results, as the site shows it. Some commands take a page number: the output shows `page` and `hasMore`, and you run the same command with `--page 2` for the next page. Others end with a `cursor` when there is more: run the same command with `--cursor <cursor>` to get the next page.
+Each command returns one page of results, as the site shows it. Some commands take a page number: the output shows `page`, and you run the same command with `--page 2` for the next page. Stop when a page has no results. Others end with a `cursor` when there is more: run the same command with `--cursor <cursor>` to get the next page.
 
-`stophy google search`, `stophy google news`, `stophy youtube search`, `stophy youtube video` and `stophy transcript` (for YouTube videos) work without logging in. Every other command needs a login or an API key.
+`stophy google search`, `stophy google news`, `stophy google maps search`, `stophy reddit search`, `stophy youtube search`, `stophy youtube video` and `stophy youtube transcript` work without logging in. Every other command needs a login or an API key.
 
 When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 

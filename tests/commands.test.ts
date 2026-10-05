@@ -34,20 +34,20 @@ test("nested catalog commands reach the matching endpoint", async () => {
 				keyless: false,
 				input: {
 					type: "object",
-					properties: { video: { type: "string" } },
-					required: ["video"],
+					properties: { videoUrl: { type: "string" }, videoId: { type: "string" } },
+					sendOne: ["videoUrl", "videoId"],
 				},
 			},
 			{
-				id: "transcript",
+				id: "youtube.transcript",
 				method: "POST",
-				path: "/v1/transcript",
-				credits: 2,
-				keyless: false,
+				path: "/v1/youtube/transcript",
+				credits: 1,
+				keyless: true,
 				input: {
 					type: "object",
-					properties: { video: { type: "string" } },
-					required: ["video"],
+					properties: { videoUrl: { type: "string" }, videoId: { type: "string" } },
+					sendOne: ["videoUrl", "videoId"],
 				},
 			},
 		],
@@ -72,8 +72,8 @@ test("nested catalog commands reach the matching endpoint", async () => {
 	expect(help.join("")).not.toContain("youtube.search");
 
 	await program.parseAsync(["youtube", "search", "--query", "bun"], { from: "user" });
-	await program.parseAsync(["transcript", "https://youtu.be/M4TufsFlv_o"], { from: "user" });
-	expect(called).toEqual(["youtube.search", "transcript"]);
+	await program.parseAsync(["youtube", "transcript", "https://youtu.be/M4TufsFlv_o"], { from: "user" });
+	expect(called).toEqual(["youtube.search", "youtube.transcript"]);
 });
 
 test("sources show their summary, or their name when the server has none", async () => {

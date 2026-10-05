@@ -67,6 +67,7 @@ interface SlotBase {
 	readonly flag: string;
 	readonly always: boolean;
 	readonly whenGroup?: string;
+	readonly sendOne?: boolean;
 	readonly description?: string;
 	readonly defaultLabel?: string;
 }
@@ -329,9 +330,37 @@ export function slotsFromInput(input: unknown): Slot[] {
 	if (schema === undefined || schema.type !== "object") {
 		throw new CliError("Endpoint input schema is not an object.");
 	}
-	return schema.fields.flatMap((field) =>
-		flatten(field.schema, [field.name], field.required, true, undefined),
-	);
+	const group = new Set(sendOneOf(input));
+	return schema.fields
+		.flatMap((field) =>
+			flatten(field.schema, [field.name], field.required, true, undefined),
+		)
+		.map((slot) => (group.has(slot.flag) ? { ...slot, sendOne: true } : slot));
+}
+
+/** The fields of which exactly one must be sent, such as `videoUrl` and `videoId`. */
+function sendOneOf(input: unknown): readonly string[] {
+	return isRecord(input) ? (readStringList(input.sendOne) ?? []) : [];
+}
+
+/** A `[xUrl, xId]` pair can be given as one bare argument: a link goes to the first field, anything else to the second. */
+function linkOrId(input: unknown): readonly [string, string] | undefined {
+	const [link, id, ...rest] = sendOneOf(input);
+	if (link === undefined || id === undefined || rest.length > 0)
+		return undefined;
+	return link.endsWith("Url") ? [link, id] : undefined;
+}
+
+function sendOneMessage(
+	group: readonly string[],
+	setFlags: ReadonlySet<string>,
+): string | undefined {
+	if (group.length === 0) return undefined;
+	const given = group.filter((flag) => setFlags.has(flag)).length;
+	if (given === 1) return undefined;
+	const names = group.map((flag) => `--${flag}`);
+	const list = `${names.slice(0, -1).join(", ")} or ${names.at(-1)}`;
+	return given === 0 ? `Send ${list}.` : `Send only one of ${list}.`;
 }
 
 function flatten(
@@ -441,6 +470,7 @@ export function parseCall(
 	const slots = slotsFromInput(input);
 	const byFlag = new Map(slots.map((slot) => [slot.flag, slot]));
 	const positional = positionalSlot(slots);
+	const pair = positional === undefined ? linkOrId(input) : undefined;
 	const body: Record<string, unknown> = {};
 	const setFlags = new Set<string>();
 	let format: ParsedCall["format"] = "text";
@@ -457,12 +487,22 @@ export function parseCall(
 			break;
 		}
 		if (!token.startsWith("-")) {
-			if (positional === undefined || setFlags.has(positional.flag))
+			const target =
+				positional ??
+				(pair === undefined
+					? undefined
+					: byFlag.get(/^https?:\/\//iu.test(token) ? pair[0] : pair[1]));
+			const taken =
+				target !== undefined &&
+				(pair === undefined
+					? setFlags.has(target.flag)
+					: pair.some((flag) => setFlags.has(flag)));
+			if (target === undefined || taken)
 				return fail(`Unexpected argument \`${token}\`.`);
-			const value = readFlag(positional, token, false, true);
+			const value = readFlag(target, token, false, true);
 			if (!value.ok) return value;
-			setValue(body, positional.flag, value.value);
-			setFlags.add(positional.flag);
+			setValue(body, target.flag, value.value);
+			setFlags.add(target.flag);
 			continue;
 		}
 		if (token === "--json") {
@@ -520,6 +560,8 @@ export function parseCall(
 
 	const missing = missingFlags(slots, setFlags);
 	if (missing.length > 0) return fail(missingMessage(missing));
+	const sendOne = sendOneMessage(sendOneOf(input), setFlags);
+	if (sendOne) return fail(sendOne);
 	const bounds = boundsMessage(slots, body);
 	if (bounds) return fail(bounds);
 	return {
@@ -926,9 +968,12 @@ export function formatEndpointHelp(endpoint: CatalogEndpoint): string {
 	const positional = positionalSlot(slots);
 	const words = endpoint.id.split(".").join(" ");
 	const name = positional ? argName(positional.flag) : "";
+	const pair = positional ? undefined : linkOrId(endpoint.input);
 	const usage = positional
 		? `stophy ${words} ${positional.always ? `<${name}>` : `[${name}]`} [options]`
-		: `stophy ${words} [options]`;
+		: pair
+			? `stophy ${words} <link-or-${argName(pair[1]).split("-").at(-1)}> [options]`
+			: `stophy ${words} [options]`;
 	const rows: [string, string][] = [
 		...slots
 			.filter((slot) => slot !== positional)
@@ -1006,6 +1051,7 @@ function optionText(slot: Slot): string {
 	const main = mainText(slot);
 	const extras: string[] = [];
 	if (slot.always) extras.push("required");
+	else if (slot.sendOne) extras.push("send one");
 	else if (slot.whenGroup) extras.push(`required with ${slot.whenGroup}`);
 	if (slot.defaultLabel !== undefined)
 		extras.push(`default: ${slot.defaultLabel}`);
@@ -1083,14 +1129,19 @@ function exampleLine(
 	const words = endpoint.id.split(".").join(" ");
 	const sample = isRecord(endpoint.example) ? endpoint.example : undefined;
 	const pieces: string[] = [`stophy ${words}`];
+	const pair = positional ? undefined : linkOrId(endpoint.input);
+	const given = pair?.find((flag) => typeof sample?.[flag] === "string");
 	if (positional) {
 		const value = sample?.[positional.flag];
 		pieces.push(quoteArg(typeof value === "string" ? value : "..."));
+	} else if (given) {
+		pieces.push(quoteArg(String(sample?.[given])));
 	}
 	const extras = sample
 		? Object.entries(sample).filter(
 				([key, value]) =>
 					key !== positional?.flag &&
+					key !== given &&
 					key !== "cursor" &&
 					(typeof value === "string" ||
 						typeof value === "number" ||

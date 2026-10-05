@@ -14,7 +14,7 @@ const endpoint = {
 	input: { type: "object", properties: {}, additionalProperties: false },
 };
 
-const newer = { ...endpoint, id: "maps.search", keyless: false, credits: 3 };
+const newer = { ...endpoint, id: "google.maps.search", keyless: false, credits: 1 };
 
 test("uses a fresh cache, refreshes a stale one, and keeps it when refresh fails", async () => {
 	const { loadCatalog, planCatalog } = await import("../src/catalog.ts");
@@ -64,7 +64,7 @@ test("uses a fresh cache, refreshes a stale one, and keeps it when refresh fails
 		warn: () => {},
 	});
 	expect(fetches).toBe(2);
-	expect(refreshed.endpoints[0]?.id).toBe("maps.search");
+	expect(refreshed.endpoints[0]?.id).toBe("google.maps.search");
 
 	const warnings: string[] = [];
 	const stale = await loadCatalog({
@@ -76,7 +76,7 @@ test("uses a fresh cache, refreshes a stale one, and keeps it when refresh fails
 		},
 		warn: (message) => warnings.push(message),
 	});
-	expect(stale.endpoints[0]?.id).toBe("maps.search");
+	expect(stale.endpoints[0]?.id).toBe("google.maps.search");
 	expect(warnings[0]).toContain("offline");
 	expect(warnings[0]).toContain("Using the cached catalog");
 
