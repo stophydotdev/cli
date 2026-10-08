@@ -1,5 +1,12 @@
 # @stophy/cli
 
+## 2.0.7
+
+### Patch Changes
+
+- f02fdbb: Follow the new API. To point at one thing, give its link or its id as the argument, such as `stophy youtube video M4TufsFlv_o`, or use the matching option like `--videoUrl` or `--videoId`. Send one, not both. Transcripts are now `stophy youtube transcript`, `stophy instagram transcript` and `stophy tiktok transcript`, and search, news, maps, Play, flights and trends live under `stophy google`. Amazon commands are new. Page-numbered commands no longer show `hasMore`: run the next page until a page has no results.
+- 1d72b3a: The README and the package description open with the product's line, "The web data API for AI agents". The README no longer lists which commands work without a login, since that list grows: `stophy endpoints` marks them `free`. Two new examples, `stophy careers jobs` and `stophy trustpilot company`.
+
 ## 2.0.6
 
 ### Patch Changes
