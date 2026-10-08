@@ -1,6 +1,6 @@
 # Stophy CLI
 
-The web data layer for AI agents, in your terminal. Live web data as typed JSON for AI agents. Search, video, social, jobs, places, property and ads behind one key, with a price shown before every call. You pay only for answers that come back. Results print as readable rows, or as JSON with `--json`.
+The web data API for AI agents, in your terminal. One API to search the web, read what people say, and look up products, places, jobs and homes. Pay only for answers. Results print as readable rows, or as JSON with `--json`.
 
 ## Get started
 
@@ -76,6 +76,8 @@ stophy reddit subreddit rust
 stophy youtube transcript https://youtu.be/M4TufsFlv_o
 stophy tiktok profile tiktok
 stophy meta ads search nike
+stophy careers jobs https://boards.greenhouse.io/figma
+stophy trustpilot company --companyDomain stripe.com
 ```
 
 To see what a source can do, run `stophy <source> --help`. To see every option for a command, run `stophy <source> <command> --help`.
@@ -96,7 +98,7 @@ To change the output:
 
 Each command returns one page of results, as the site shows it. Some commands take a page number: the output shows `page`, and you run the same command with `--page 2` for the next page. Stop when a page has no results. Others end with a `cursor` when there is more: run the same command with `--cursor <cursor>` to get the next page.
 
-`stophy google search`, `stophy google news`, `stophy google maps search`, `stophy reddit search`, `stophy youtube search`, `stophy youtube video` and `stophy youtube transcript` work without logging in. Every other command needs a login or an API key.
+Some commands work without logging in, within a small free allowance. `stophy endpoints` marks them `free`. Every other command needs a login or an API key.
 
 When a request fails, the error ends with `Request id: <id>`. Include it when you report a problem.
 

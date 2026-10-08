@@ -1,7 +1,7 @@
 {
   "name": "@stophy/cli",
   "version": "2.0.6",
-  "description": "The web data layer for AI agents, in your terminal. Live web data as typed JSON for AI agents. Search, video, social, jobs, places, property and ads behind one key, with a price shown before every call. You pay only for answers that come back.",
+  "description": "The web data API for AI agents, in your terminal. One API to search the web, read what people say, and look up products, places, jobs and homes. Pay only for answers.",
   "license": "MIT",
   "type": "module",
   "bin": {
