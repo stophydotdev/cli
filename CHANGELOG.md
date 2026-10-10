@@ -1,5 +1,12 @@
 # @stophy/cli
 
+## 2.0.8
+
+### Patch Changes
+
+- e9a9f2a: `stophy init` adds the Stophy MCP server at `https://mcp.stophy.dev/mcp`, the same sign-in address the docs use.
+- e9a9f2a: The README and the package description open with the product's line, "Web scraping API for AI agents".
+
 ## 2.0.7
 
 ### Patch Changes
