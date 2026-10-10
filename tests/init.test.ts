@@ -7,7 +7,7 @@ import {
 	skillsArgs,
 } from "../src/commands/init.ts";
 
-const MCP_URL = "https://api.stophy.dev/mcp-oauth";
+const MCP_URL = "https://mcp.stophy.dev/mcp";
 
 function fake(overrides: Partial<InitDependencies> = {}) {
 	const calls: string[][] = [];

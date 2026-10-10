@@ -9,7 +9,7 @@ import { CliError } from "../errors.js";
 import { doBrowserLogin } from "../prompt-login.js";
 import type { InitOptions } from "../types/init.js";
 
-const MCP_URL = "https://api.stophy.dev/mcp-oauth";
+const MCP_URL = "https://mcp.stophy.dev/mcp";
 const SKILLS_PACKAGE = "stophydotdev/skills";
 const NEXT_STEP = 'stophy google search "latest bun release"';
 

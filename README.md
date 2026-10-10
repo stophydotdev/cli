@@ -1,6 +1,6 @@
 # Stophy CLI
 
-The web data API for AI agents, in your terminal. One API to search the web, read what people say, and look up products, places, jobs and homes. Pay only for answers. Results print as readable rows, or as JSON with `--json`.
+Web scraping API for AI agents, in your terminal. One API to search the web, read what people say, and look up products, places, jobs and homes. Pay only for answers. Results print as readable rows, or as JSON with `--json`.
 
 ## Get started
 
