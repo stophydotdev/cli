@@ -1,5 +1,11 @@
 # @stophy/cli
 
+## 2.0.9
+
+### Patch Changes
+
+- 3677d6f: The help and login screens say "The web scraping API for AI agents, from your terminal".
+
 ## 2.0.8
 
 ### Patch Changes
