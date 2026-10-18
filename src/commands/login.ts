@@ -11,7 +11,7 @@ type LoginMode = "api-key" | "browser";
 
 async function promptForLoginMode(): Promise<LoginMode> {
 	err(`  @stophy/cli v${packageJson.version}`);
-	err("  Web data for AI agents");
+	err("  The web scraping API for AI agents, from your terminal");
 	err("");
 	err("Welcome! To get started, authenticate with your Stophy account.");
 	err("");
