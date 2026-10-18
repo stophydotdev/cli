@@ -1,5 +1,5 @@
 name: stophy
-description: "Public web data from your terminal: search, video, social, places, shopping, jobs and real estate."
+description: "The web scraping API for AI agents, from your terminal."
 homepage: https://stophy.dev
 maintainer: Stophy <support@stophy.dev>
 license: MIT
